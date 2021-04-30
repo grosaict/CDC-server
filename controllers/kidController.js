@@ -6,13 +6,6 @@ const Item = require('../models/Item'); // EXCLUIR
 exports.loadAllKids = async (req, res) => {
     try {
         let kids = await Kid.find({isAtivo: true}).sort({createAt: 'desc'}).exec();
-        /* for (const [idx, item] of itens.entries()) {     ### USER POPULATION NOT REQUIRED
-            const user = await User.findById(item.user);
-            item.user = user;
-            if(req.user._id == user._id){
-                item.owner = true;
-            }
-        } */
         res.status(200).json({data: kids});
     } catch (err){
         res.status(400).send({"message": "Erro ao buscar as crianças"});
@@ -46,5 +39,25 @@ exports.loadKid = async (req, res) => {
         }
     } catch (err){
         res.status(400).send({"message": "Erro ao buscar item"});
+    }
+}
+
+exports.createKid = async (req, res) => {
+    const { user, name, birth, gender } = req.body;
+    const { dataAchadoPerdido, titulo, categoria, descricao, tipo } = req.body;
+
+    const newKid = new Item({
+        titulo: titulo,
+        tipo: tipo,
+        categoria: categoria,
+        descricao: descricao,
+        dataAchadoPerdido: dataAchadoPerdido,
+        user: req.user._id
+    });
+    try {
+        await newKid.save();
+        res.status(200).json({"message": "Criança cadastrada com sucesso"});
+    } catch (err){
+        res.status(400).json({"message": "Erro ao registrar criança"});
     }
 }

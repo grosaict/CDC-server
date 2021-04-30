@@ -2,10 +2,18 @@ const { registerValidation } = require('../validations/validations');
 const tokenController = require('../controllers/tokenController');
 
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-exports.registerUser = async (req, res) => {
+exports.getUser = async (req, res) => {
+    const user = 1;
+    try {
+        res.status(200).json({"user": user});
+    } catch (err){
+        res.status(201).send({"message": "Erro ao registrar usaurio"});
+    }
+}
+
+exports.createUser = async (req, res) => {
     
     const data = req.body;
     
@@ -30,8 +38,6 @@ exports.registerUser = async (req, res) => {
         name: data.name,
         email: data.email,
         password: hashPassword,
-        /* phone: data.phone,
-        gender: data.gender, */
     });
 
     try {

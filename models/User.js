@@ -20,15 +20,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         hide: true
     },
-/*     phone: {
-        type: String,
-        required: true,
-    },
-    gender: {
-        type: String,
-        required: true
-    },
- */
     createAt: {
         type: Date,
         default: Date.now,

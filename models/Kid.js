@@ -3,9 +3,8 @@ var Schema = mongoose.Schema;
 
 const KidSchema = new mongoose.Schema({
     user: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
+        type: String,
+        required: true
     },
     name: {
         type: String,
