@@ -1,11 +1,9 @@
 const User = require('../models/User');
 const Kid = require('../models/Kid');
 
-const Item = require('../models/Item'); // EXCLUIR
-
 exports.loadAllKids = async (req, res) => {
     try {
-        let kids = await Kid.find({isActive: true}).sort({createAt: 'desc'}).exec();
+        let kids = await Kid.find({isActive: true, user: req.user._id}).sort({name: 'asc'}).exec();
         res.status(200).json({data: kids});
     } catch (err){
         res.status(400).send({"message": "Erro ao buscar as crianças"});
@@ -21,7 +19,7 @@ exports.loadKid = async (req, res) => {
     const kidId = req.params.id;
     try {
         const kid = await Kid.findOne({_id: kidId}).exec();
-        kid.user = await User.findById(kid.user);
+        kid.user  = await User.findById(kid.user);
         if(isEdit){
             if(kid.user._id == req.user._id){
                 res.status(200).json({
@@ -45,16 +43,17 @@ exports.loadKid = async (req, res) => {
 exports.createKid = async (req, res) => {
     const { name, birth, gender } = req.body;
 
-    console.log(JSON.stringify(req.body));
+    let nameUpper   = name.toUpperCase()
+    let genderUpper = gender.toUpperCase()
 
     const newKid = new Kid({
-        name: name,
+        name: nameUpper,
         birth: birth,
-        gender: gender,
+        gender: genderUpper,
         user: req.user._id
     });
 
-    console.log(JSON.stringify(newKid));
+    /* console.log(JSON.stringify(newKid)); */
 
     try {
         await newKid.save();

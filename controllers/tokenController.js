@@ -20,7 +20,3 @@ module.exports.validation = function(req, res, next){
         res.status(400).send("Invalid Token");
     }
 }
-
-exports.getToken = function(req, res){
-    return res.status(200).send(req.header('token'));
-};

@@ -8,8 +8,7 @@ router.get('/:id', tokenController.validation, kidController.loadKid);
 
 
 /* 
-router.get('/:id', tokenController.validation, itemController.buscarItem);
-outer.put('/deactivate/:id', itemController.desativarItem);
+router.put('/deactivate/:id', itemController.desativarItem);
 */
 
 module.exports = router;
