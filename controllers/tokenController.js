@@ -6,7 +6,6 @@ exports.generateToken = (user) => {
 };
 
 module.exports.validation = function(req, res, next){
-    
     const token = req.header('token');
 
     if(!token){
@@ -20,5 +19,8 @@ module.exports.validation = function(req, res, next){
     }catch(err){
         res.status(400).send("Invalid Token");
     }
-
 }
+
+exports.getToken = function(req, res){
+    return res.status(200).send(req.header('token'));
+};

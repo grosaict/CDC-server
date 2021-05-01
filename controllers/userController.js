@@ -1,17 +1,8 @@
-const { registerValidation } = require('../validations/validations');
+const { registerValidation } = require('../validations');
 const tokenController = require('../controllers/tokenController');
 
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-
-exports.getUser = async (req, res) => {
-    const user = 1;
-    try {
-        res.status(200).json({"user": user});
-    } catch (err){
-        res.status(201).send({"message": "Erro ao registrar usaurio"});
-    }
-}
 
 exports.createUser = async (req, res) => {
     

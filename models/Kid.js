@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 const KidSchema = new mongoose.Schema({
-    user: {
-        type: String,
-        required: true
-    },
     name: {
         type: String,
         required: true
@@ -27,7 +23,7 @@ const KidSchema = new mongoose.Schema({
     pediatric: {
         type: [],
     },
-    isAtivo: {
+    isActive: {
         type: Boolean,
         default: true,
         required: true
@@ -36,6 +32,11 @@ const KidSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
         required: true
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     }
 });
 

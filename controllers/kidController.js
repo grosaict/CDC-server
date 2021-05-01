@@ -5,7 +5,7 @@ const Item = require('../models/Item'); // EXCLUIR
 
 exports.loadAllKids = async (req, res) => {
     try {
-        let kids = await Kid.find({isAtivo: true}).sort({createAt: 'desc'}).exec();
+        let kids = await Kid.find({isActive: true}).sort({createAt: 'desc'}).exec();
         res.status(200).json({data: kids});
     } catch (err){
         res.status(400).send({"message": "Erro ao buscar as crianças"});
@@ -18,42 +18,44 @@ exports.loadKid = async (req, res) => {
     if(requestURL.indexOf('edit') != -1){
         isEdit = true;
     }
-    const itemID = req.params.id;
+    const kidId = req.params.id;
     try {
-        const item = await Item.findOne({_id: itemID}).exec();
-        item.user = await User.findById(item.user);
+        const kid = await Kid.findOne({_id: kidId}).exec();
+        kid.user = await User.findById(kid.user);
         if(isEdit){
-            if(item.user._id == req.user._id){
+            if(kid.user._id == req.user._id){
                 res.status(200).json({
-                    data: item,
+                    data: kid,
                 });
             } else {
                 res.status(403).send({
-                    message: 'Você não tem acesso a esse item',
+                    message: 'Acesso negado',
                 });
             }
         } else {
             res.status(200).json({
-                data: item,
+                data: kid,
             });
         }
     } catch (err){
-        res.status(400).send({"message": "Erro ao buscar item"});
+        res.status(400).send({"message": "Erro ao buscar criança"});
     }
 }
 
 exports.createKid = async (req, res) => {
-    const { user, name, birth, gender } = req.body;
-    const { dataAchadoPerdido, titulo, categoria, descricao, tipo } = req.body;
+    const { name, birth, gender } = req.body;
 
-    const newKid = new Item({
-        titulo: titulo,
-        tipo: tipo,
-        categoria: categoria,
-        descricao: descricao,
-        dataAchadoPerdido: dataAchadoPerdido,
+    console.log(JSON.stringify(req.body));
+
+    const newKid = new Kid({
+        name: name,
+        birth: birth,
+        gender: gender,
         user: req.user._id
     });
+
+    console.log(JSON.stringify(newKid));
+
     try {
         await newKid.save();
         res.status(200).json({"message": "Criança cadastrada com sucesso"});

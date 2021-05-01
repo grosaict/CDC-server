@@ -1,6 +1,5 @@
 const tokenController = require('../controllers/tokenController');
-const {loginValidation} = require('../validations/validations');
-const {isEmail} = require('../validations/validations');
+const {loginValidation, isEmail} = require('../validations');
 
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
