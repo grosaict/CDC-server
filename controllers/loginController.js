@@ -19,12 +19,12 @@ exports.login = async (req, res) => {
     }
 
     if(!user) {
-        return res.status(404).json({"message": "Este usuário não existe"});
+        return res.status(403).json({"message": "Este usuário não existe"});
     }
 
     const validPassword = await bcrypt.compare(data.password, user.password);
     if(!validPassword){
-        return res.status(404).json({"message": "Senha incorreta"});
+        return res.status(403).json({"message": "Senha incorreta"});
     }
 
     const token = tokenController.generateToken(user);

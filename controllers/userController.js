@@ -36,7 +36,7 @@ exports.createUser = async (req, res) => {
         const token = tokenController.generateToken(savedUser);
         res.status(200).json({"token": token});
     } catch (err){
-        res.status(201).send({"message": "Erro ao registrar usaurio"});
+        res.status(201).send({"message": "Erro ao registrar usuário"});
     }
 
 }
