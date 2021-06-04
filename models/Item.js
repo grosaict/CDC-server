@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+/* const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 const ItemSchema = new mongoose.Schema({
@@ -47,4 +47,4 @@ const ItemSchema = new mongoose.Schema({
 
 ItemSchema.index({'$**': 'text'});
 
-module.exports = mongoose.model('Item', ItemSchema)
+module.exports = mongoose.model('Item', ItemSchema) */

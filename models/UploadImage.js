@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+/* const mongoose = require('mongoose');
 const aws = require("aws-sdk");
 const fs = require("fs");
 const path = require("path");
@@ -44,4 +44,4 @@ UploadSchema.pre("remove", function() {
     }
 });
 
-module.exports = mongoose.model("Upload", UploadSchema);
+module.exports = mongoose.model("Upload", UploadSchema); */

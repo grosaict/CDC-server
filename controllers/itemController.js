@@ -1,4 +1,4 @@
-const User = require('../models/User');
+/* const User = require('../models/User');
 const Item = require('../models/Item');
 
 
@@ -102,6 +102,6 @@ exports.desativarItem = async (req, res) => {
     } catch (err){
         res.status(400).send({"message": "Erro ao desativar item"});
     }
-}
+} */
 
 

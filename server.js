@@ -19,9 +19,9 @@ app.use(morgan('dev'));
 const kidRoute = require('./routes/kid');
 const loginRoute = require('./routes/login');
 const userRoute = require('./routes/user');
-const searchRoute = require('./routes/search');
+//const searchRoute = require('./routes/search');
 
-const itemRoute = require('./routes/item'); // EXCLUIR
+//const itemRoute = require('./routes/item'); // EXCLUIR
 
 app.use(
   "/files",
@@ -42,9 +42,9 @@ mongoose.set('useCreateIndex', true);
 app.use('/api/kid', kidRoute);
 app.use('/api/login', loginRoute);
 app.use('/api/user', userRoute);
-app.use('/api/search', searchRoute);
+//app.use('/api/search', searchRoute);
 
-app.use('/api/item', itemRoute); // EXCLUIR
+//app.use('/api/item', itemRoute); // EXCLUIR
 
 const port = process.env.PORT;
 

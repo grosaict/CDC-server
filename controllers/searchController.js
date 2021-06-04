@@ -1,4 +1,4 @@
-const Item = require('../models/Item');
+/* const Item = require('../models/Item');
 const User = require('../models/User');
 
 exports.buscaPorTexto = async (req, res) => {
@@ -64,4 +64,4 @@ exports.buscaAvancada = async (req, res) => {
     } catch (err){
         return res.status(400).send({"message": "Erro ao buscar itens"});
     }
-}
+} */

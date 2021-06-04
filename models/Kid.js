@@ -14,13 +14,13 @@ const KidSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    measure: {
+    measures: {
         type: [],
     },
-    vacine: {
+    vaccines: {
         type: [],
     },
-    pediatric: {
+    pediatrics: {
         type: [],
     },
     isActive: {

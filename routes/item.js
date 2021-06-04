@@ -1,4 +1,4 @@
-const router = require('express').Router();
+/* const router = require('express').Router();
 const itemController = require('../controllers/itemController');
 const tokenController = require('../controllers/tokenController');
 const multer = require('multer');
@@ -10,4 +10,4 @@ router.get('/:id', tokenController.validation, itemController.buscarItem);
 router.put('/edit/:id', [tokenController.validation, multer(multerConfig).array("imagens")], itemController.atualizarItem);
 router.put('/deactivate/:id', itemController.desativarItem);
 
-module.exports = router;
+module.exports = router; */
