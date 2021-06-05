@@ -60,8 +60,8 @@ exports.createKid = async (req, res) => {
             blankMeasures [index] = {
                 dueMonth:       index,
                 scheduleDate:   sDate,
-                weight:         0,
-                isSetW:         false,
+                weight:         index, // using index to poulate >>> default = 0,
+                isSetW:         true,       // using true to populate >>> default = false,
                 length:         0,
                 isSetL:         false,
                 head:           0,
