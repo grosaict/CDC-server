@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Kid = require('../models/Kid');
+const MeasuresSchema = require('../models/Measures');
 
 exports.loadAllKids = async (req, res) => {
     try {
@@ -51,25 +52,26 @@ exports.createKid = async (req, res) => {
     const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
 
     function setMeasures () {
-        const today = new Date()
-        let blankMeasures = []
-        let sDate = birthGMT3
+        let sDate           = birthGMT3
+        let measures        = MeasuresSchema.MeasuresSchema
+        let blankItem       = MeasuresSchema.MeasureItem
+        measures.lastUpdate = new Date()
+        measures.table      = []
 
         for (let index = 0; index <= 24; index++) {
             index > 0 ? sDate = addOneMonth(sDate) : false
-            blankMeasures [index] = {
-                dueMonth:       index,
+            blankItem = {
                 scheduleDate:   sDate,
-                weight:         index, // using index to poulate >>> default = 0,
-                isSetW:         true,       // using true to populate >>> default = false,
+                weight:         index / 2,  // using index to poulate >>> default = 0,
+                isSetW:         true,   // using true to populate >>> default = false,
                 length:         0,
                 isSetL:         false,
                 head:           0,
-                isSetH:         false,
-                lastUpdate:     today
-            };
+                isSetH:         false
+            }
         }
-        return blankMeasures;
+
+        return measures;
     }
 
     function addOneMonth (d) {
@@ -90,7 +92,7 @@ exports.createKid = async (req, res) => {
                     case 5:
                     case 8:
                     case 10:
-                        day = 30;
+                        if (day > 30) { day = 30 }
                         break;
                 }
             }

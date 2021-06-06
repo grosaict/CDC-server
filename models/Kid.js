@@ -15,7 +15,8 @@ const KidSchema = new mongoose.Schema({
         required: true
     },
     measures: {
-        type: [],
+        type: Object,
+        required: true
     },
     vaccines: {
         type: [],
