@@ -1,7 +1,6 @@
 const User              = require('../models/User');
 const Kid               = require('../models/Kid');
-const MeasuresSchema    = require('../models/MeasuresOld');
-const MeasureController = require('../controllers/MeasureController');
+const MeasureController = require('../controllers/measureController');
 
 exports.loadAllKids = async (req, res) => {
     try {
@@ -42,6 +41,35 @@ exports.loadKid = async (req, res) => {
                 data: kid,
             });
         } */
+    } catch (err){
+        res.status(400).send({"message": "Erro ao buscar criança"});
+    }
+}
+
+
+exports.loadKidByMeasure = async (req, res) => {
+    const measureId = req.params.id;
+    try {
+        const m   = await MeasureController.loadMeasure(measureId)
+        const kid       = await Kid.findOne({_id: m.measure.kid}).exec();
+        kid.user        = await User.findById(kid.user);
+        if(kid.user._id == req.user._id){
+            const measures = await MeasureController.loadAllMeasures(kid)
+            if (!measures.err) {
+                kid.measures = measures.measures
+                res.status(200).json({
+                    data: {
+                        measure:    m.measure,
+                        kid:        kid
+                    }
+                });
+            } else {
+                res.status(400).send({ message: 'Problema ao obter medidas',});
+            }
+        } else {
+            res.status(403).send({ message: 'Acesso negado', });
+        }
+
     } catch (err){
         res.status(400).send({"message": "Erro ao buscar criança"});
     }

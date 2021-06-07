@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-const path = require("path");
+/* const path = require("path"); */
 
 dotenv.config();
 
@@ -17,16 +17,14 @@ app.use(morgan('dev'));
 
 //Importing routes
 const kidRoute = require('./routes/kid');
+const measureRoute = require('./routes/measure');
 const loginRoute = require('./routes/login');
 const userRoute = require('./routes/user');
-//const searchRoute = require('./routes/search');
 
-//const itemRoute = require('./routes/item'); // EXCLUIR
-
-app.use(
+/* app.use(
   "/files",
   express.static(path.resolve(__dirname, "uploads"))
-);
+); */
 
 mongoose.connect(
   process.env.DB_CONNECT, 
@@ -40,11 +38,9 @@ mongoose.set('useCreateIndex', true);
 
 //Make routes available
 app.use('/api/kid', kidRoute);
+app.use('/api/measure', measureRoute);
 app.use('/api/login', loginRoute);
 app.use('/api/user', userRoute);
-//app.use('/api/search', searchRoute);
-
-//app.use('/api/item', itemRoute); // EXCLUIR
 
 const port = process.env.PORT;
 
