@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const   mongoose    = require('mongoose');
+var     Schema      = mongoose.Schema;
 
-const KidSchema = new mongoose.Schema({
+const KidSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -15,7 +15,7 @@ const KidSchema = new mongoose.Schema({
         required: true
     },
     measures: {
-        type: Object,
+        type: Array,
         required: true
     },
     vaccines: {

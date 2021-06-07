@@ -1,9 +1,9 @@
-const MeasuresSchema = new Object({
+const MeasuresSchemaOld = new Object({
     lastUpdate:     { type: Date },
     table:          { type: Array }
 })
 
-const MeasureItem = {
+const MeasureItemOld = {
     scheduleDate:   { type: Date },
     weight:         { type: Number },
     isSetW:         { type: Boolean },
@@ -13,4 +13,4 @@ const MeasureItem = {
     isSetH:         { type: Boolean }
 }
 
-module.exports = { MeasuresSchema, MeasureItem }
+module.exports = { MeasuresSchemaOld, MeasureItemOld }

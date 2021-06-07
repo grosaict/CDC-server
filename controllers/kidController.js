@@ -1,6 +1,7 @@
-const User = require('../models/User');
-const Kid = require('../models/Kid');
-const MeasuresSchema = require('../models/Measures');
+const User              = require('../models/User');
+const Kid               = require('../models/Kid');
+const MeasuresSchema    = require('../models/MeasuresOld');
+const MeasureController = require('../controllers/MeasureController');
 
 exports.loadAllKids = async (req, res) => {
     try {
@@ -12,7 +13,7 @@ exports.loadAllKids = async (req, res) => {
 }
 
 exports.loadKid = async (req, res) => {
-    const requestURL = req.headers.referer.split('/')
+    //const requestURL = req.headers.referer.split('/')
    /*  let isEdit = false;
     if(requestURL.indexOf('edit') != -1){
         isEdit = true;
@@ -23,13 +24,18 @@ exports.loadKid = async (req, res) => {
         kid.user  = await User.findById(kid.user);
         /* if(isEdit){ */
             if(kid.user._id == req.user._id){
-                res.status(200).json({
-                    data: kid,
-                });
+                const resMeasures = await MeasureController.loadAllMeasures(kid)
+                //console.log(">>>loadKid"+JSON.stringify(x))
+                if (!resMeasures.err) {
+                    kid.measures = resMeasures.measures
+                    res.status(200).json({
+                        data: kid,
+                    });
+                } else {
+                    res.status(400).send({ message: 'Problema ao obter medidas',});
+                }
             } else {
-                res.status(403).send({
-                    message: 'Acesso negado',
-                });
+                res.status(403).send({ message: 'Acesso negado', });
             }
         /* } else {
             res.status(200).json({
@@ -44,67 +50,18 @@ exports.loadKid = async (req, res) => {
 exports.createKid = async (req, res) => {
     const { name, birth , gender } = req.body;
 
-    let nameUpper       = name.toUpperCase()
-    let genderUpper     = gender.toUpperCase()
+    const nameUpper     = name.toUpperCase()
+    const genderUpper   = gender.toUpperCase()
     const birthDay      = new Date(birth).getDate()
     const birthMonth    = new Date(birth).getMonth()
     const birthYear     = new Date(birth).getFullYear()
     const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
 
-    function setMeasures () {
-        let sDate           = birthGMT3
-        let measures        = MeasuresSchema.MeasuresSchema
-        let blankItem       = MeasuresSchema.MeasureItem
-        measures.lastUpdate = new Date()
-        measures.table      = []
-
-        for (let index = 0; index <= 24; index++) {
-            index > 0 ? sDate = addOneMonth(sDate) : false
-            blankItem = {
-                scheduleDate:   sDate,
-                weight:         index / 2,  // using index to poulate >>> default = 0,
-                isSetW:         true,   // using true to populate >>> default = false,
-                length:         0,
-                isSetL:         false,
-                head:           0,
-                isSetH:         false
-            }
-        }
-
-        return measures;
-    }
-
-    function addOneMonth (d) {
-        let day = birthDay
-        let month = d.getMonth() + 1
-        let year = d.getFullYear()
-
-        if (month > 11) {
-            month = 0
-            year++
-        } else {
-            if (day > 28) {
-                switch (month) {
-                    case 1:
-                        day = 28;
-                        break;
-                    case 3:
-                    case 5:
-                    case 8:
-                    case 10:
-                        if (day > 30) { day = 30 }
-                        break;
-                }
-            }
-        }
-        return new Date(year, month, day);
-    }
-
     const newKid = new Kid({
         name: nameUpper,
         birth: birthGMT3,
         gender: genderUpper,
-        measures: setMeasures (birth),
+        measures: new Array(),
         user: req.user._id
     });
 
@@ -112,9 +69,14 @@ exports.createKid = async (req, res) => {
     //console.log(JSON.stringify(newKid));
 
     try {
-        
-        await newKid.save();
-        res.status(200).json({"message": "Criança cadastrada com sucesso"});
+        const savedKid  = await newKid.save();
+        //console.log("kkkkkkk "+JSON.stringify(savedKid))
+        const errorM    = await MeasureController.createBlankMeasures(savedKid)
+        if (!errorM) {
+            res.status(200).json({"message": "Criança cadastrada com sucesso"});
+        } else {
+            res.status(400).json({"message": "Erro ao cadastastrar as medidas"});
+        }
     } catch (err){
         res.status(400).json({"message": "Erro ao registrar criança"});
     }
