@@ -97,3 +97,25 @@ const blankMeasures = async (req) => {
         return new Date(year, month, day);
     }
 }
+
+exports.updateMeasure = async (req, res) => {
+/*     const body = req.body;
+    const itemID = req.params.id;
+    const imagens = [];
+    if(req.files.length){
+        req.files.map((file, index) => {
+            imagens.push(`${process.env.HOST}:${process.env.PORT}/files/${file.filename}`)
+        });
+        body.imagens = imagens;
+    }
+    const filter = { _id: itemID };
+    try {
+        if(req.files === undefined){
+            body.imagens = [];
+        }
+        await Item.findOneAndUpdate(filter, body);
+        res.status(200).json({"message": "Item Atualizado com sucesso"});
+    } catch (err){
+        res.status(400).send({"message": "Erro ao atualizar item"});
+    } */
+}

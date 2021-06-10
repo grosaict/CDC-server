@@ -19,10 +19,10 @@ const KidSchema = new Schema({
         required: true
     },
     vaccines: {
-        type: [],
+        type: Array,
     },
     pediatrics: {
-        type: [],
+        type: Array,
     },
     isActive: {
         type: Boolean,
