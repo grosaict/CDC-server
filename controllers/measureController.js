@@ -56,11 +56,11 @@ const blankMeasures = async (req) => {
             blankItem = new Measure({
                 dueMonth:       index,
                 scheduleDate:   sDate,
-                weight:         index / 2,  // using index to poulate >>> default = 0,
+                weight:         index * 1000,  // using index to poulate >>> default = 0,
                 isSetW:         true,   // using true to populate >>> default = false,
-                length:         0,
+                length:         0.1,
                 isSetL:         false,
-                head:           0,
+                head:           0.1,
                 isSetH:         false,
                 kid:            _id
             });
@@ -99,23 +99,91 @@ const blankMeasures = async (req) => {
 }
 
 exports.updateMeasure = async (req, res) => {
-/*     const body = req.body;
-    const itemID = req.params.id;
-    const imagens = [];
-    if(req.files.length){
-        req.files.map((file, index) => {
-            imagens.push(`${process.env.HOST}:${process.env.PORT}/files/${file.filename}`)
-        });
-        body.imagens = imagens;
+
+    const measureId = req.params.id;
+    const userId    = req.body.kid.user._id;
+
+    const body      = {
+        weight: req.body.weight,
+        isSetW: ( req.body.weight > 0 ? true : false ),
+        length: req.body.length,
+        isSetL: ( req.body.length > 0 ? true : false ),
+        head:   req.body.head,
+        isSetH: ( req.body.head > 0 ? true : false ),
     }
+
+    const isFieldsOk = () => {  // ### TO SET LIMITS BASED IN WHO DATA
+
+        if (!body.weight                || body.weight === ''   ||
+            body.weight === undefined   || body.weight < 0      || body.weight > 3000) {
+            return false
+        }
+
+        if (!body.length                || body.length === ''   ||
+            body.length === undefined   || body.length < 0      || body.length > 100) {
+            
+            return false
+        }
+
+        if (!body.head                  || body.head === ''     ||
+            body.head === undefined     || body.head < 0        || body.head > 100) {
+            return false
+        }
+
+        return true
+    }
+
+    try {
+        if (isFieldsOk()) {
+            console.log(isFieldsOk)
+            if(userId == req.user._id){
+                await Measure.findOneAndUpdate(measureId, body);
+                res.status(200).json({"message": "Medias atualizadas com sucesso"});
+            } else {
+                res.status(403).send({ message: 'Acesso negado', });
+            }
+        } else {
+            res.status(400).send({"message": "Alguma medida está acima ou abaixo do aceitável"});
+        }
+    } catch (err){
+        res.status(400).send({"message": "Erro ao atualizar medidas"});
+    }
+
+/*     
+    const itemID = req.params.id;
+
     const filter = { _id: itemID };
     try {
-        if(req.files === undefined){
-            body.imagens = [];
-        }
+
         await Item.findOneAndUpdate(filter, body);
         res.status(200).json({"message": "Item Atualizado com sucesso"});
     } catch (err){
         res.status(400).send({"message": "Erro ao atualizar item"});
+    } */
+
+    /* 
+    try {
+        const m   = await MeasureController.loadMeasure(measureId)
+        const kid       = await Kid.findOne({_id: m.measure.kid}).exec();
+        kid.user        = await User.findById(kid.user);
+        if(kid.user._id == req.user._id){
+            const measures = await MeasureController.loadAllMeasures(kid)
+            if (!measures.err) {
+                kid.measures = measures.measures
+                res.status(200).json({
+                    data: {
+                        measure:    m.measure,
+                        kid:        kid
+                    }
+                });
+            } else {
+                res.status(400).send({ message: 'Problema ao obter medidas',});
+            }
+        } else {
+            res.status(403).send({ message: 'Acesso negado', });
+        }
+
+    } catch (err){
+        res.status(400).send({"message": "Erro ao buscar criança"});
     } */
 }
