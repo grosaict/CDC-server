@@ -1,4 +1,5 @@
-const Measure       = require('../models/Measure');
+const Kid       = require('../models/Kid');
+const Measure   = require('../models/Measure');
 
 exports.loadAllMeasures = async (req) => {
     //console.log("loadAllMeasures >>>"+req)
@@ -38,12 +39,9 @@ exports.loadMeasure = async (idMeasure) => {
     }
 }
 
-
 exports.createBlankMeasures = async (req) => { blankMeasures(req) }
 
-
 const blankMeasures = async (req) => {
-    //console.log("blankMeasures >>>"+req)
     const {_id, birth}  = req;
     const birthDay      = new Date(birth).getDate()
 
@@ -56,11 +54,11 @@ const blankMeasures = async (req) => {
             blankItem = new Measure({
                 dueMonth:       index,
                 scheduleDate:   sDate,
-                weight:         index * 1000,  // using index to poulate >>> default = 0,
-                isSetW:         true,   // using true to populate >>> default = false,
-                length:         0.1,
+                weight:         0 ,
+                isSetW:         false,
+                length:         0,
                 isSetL:         false,
-                head:           0.1,
+                head:           0,
                 isSetH:         false,
                 kid:            _id
             });
@@ -99,8 +97,7 @@ const blankMeasures = async (req) => {
 }
 
 exports.updateMeasure = async (req, res) => {
-
-    const measureId = req.params.id;
+    const filter = { _id: req.params.id }; // measureId
     const userId    = req.body.kid.user._id;
 
     const body      = {
@@ -112,78 +109,37 @@ exports.updateMeasure = async (req, res) => {
         isSetH: ( req.body.head > 0 ? true : false ),
     }
 
-    const isFieldsOk = () => {  // ### TO SET LIMITS BASED IN WHO DATA
+    const isDataOk = () => {  // ### TO SET LIMITS BASED IN WHO DATA
 
-        if (!body.weight                || body.weight === ''   ||
-            body.weight === undefined   || body.weight < 0      || body.weight > 3000) {
+        if (body.weight === ''   ||
+            body.weight === undefined   || body.weight < 0      || body.weight > 25000) {
             return false
         }
 
         if (!body.length                || body.length === ''   ||
-            body.length === undefined   || body.length < 0      || body.length > 100) {
-            
+            body.length === undefined   || body.length < 0      || body.length > 150) {
             return false
         }
 
         if (!body.head                  || body.head === ''     ||
-            body.head === undefined     || body.head < 0        || body.head > 100) {
+            body.head === undefined     || body.head < 0        || body.head > 70) {
             return false
         }
-
         return true
     }
 
     try {
-        if (isFieldsOk()) {
-            console.log(isFieldsOk)
-            if(userId == req.user._id){
-                await Measure.findOneAndUpdate(measureId, body);
-                res.status(200).json({"message": "Medias atualizadas com sucesso"});
-            } else {
-                res.status(403).send({ message: 'Acesso negado', });
-            }
-        } else {
-            res.status(400).send({"message": "Alguma medida está acima ou abaixo do aceitável"});
+        if (!isDataOk()) {
+            return res.status(400).send({"message": "Alguma medida está acima ou abaixo do aceitável"});
         }
+        const m = await Measure.findOne(filter).exec();
+        const k = await Kid.findOne({_id: m.kid}).exec();
+        if(userId != k.user._id){
+            return res.status(403).send({ message: 'Acesso negado', });
+        }
+        await Measure.findOneAndUpdate(filter, body).exec();
+        res.status(200).json({"message": "Medias atualizadas com sucesso"});
     } catch (err){
         res.status(400).send({"message": "Erro ao atualizar medidas"});
     }
-
-/*     
-    const itemID = req.params.id;
-
-    const filter = { _id: itemID };
-    try {
-
-        await Item.findOneAndUpdate(filter, body);
-        res.status(200).json({"message": "Item Atualizado com sucesso"});
-    } catch (err){
-        res.status(400).send({"message": "Erro ao atualizar item"});
-    } */
-
-    /* 
-    try {
-        const m   = await MeasureController.loadMeasure(measureId)
-        const kid       = await Kid.findOne({_id: m.measure.kid}).exec();
-        kid.user        = await User.findById(kid.user);
-        if(kid.user._id == req.user._id){
-            const measures = await MeasureController.loadAllMeasures(kid)
-            if (!measures.err) {
-                kid.measures = measures.measures
-                res.status(200).json({
-                    data: {
-                        measure:    m.measure,
-                        kid:        kid
-                    }
-                });
-            } else {
-                res.status(400).send({ message: 'Problema ao obter medidas',});
-            }
-        } else {
-            res.status(403).send({ message: 'Acesso negado', });
-        }
-
-    } catch (err){
-        res.status(400).send({"message": "Erro ao buscar criança"});
-    } */
 }

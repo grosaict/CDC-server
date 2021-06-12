@@ -1,6 +1,7 @@
 const User              = require('../models/User');
 const Kid               = require('../models/Kid');
 const MeasureController = require('../controllers/measureController');
+const VaccineController = require('../controllers/vaccineController');
 
 exports.loadAllKids = async (req, res) => {
     try {
@@ -12,45 +13,32 @@ exports.loadAllKids = async (req, res) => {
 }
 
 exports.loadKid = async (req, res) => {
-    //const requestURL = req.headers.referer.split('/')
-   /*  let isEdit = false;
-    if(requestURL.indexOf('edit') != -1){
-        isEdit = true;
-    } */
     const kidId = req.params.id;
     try {
         const kid = await Kid.findOne({_id: kidId}).exec();
         kid.user  = await User.findById(kid.user);
-        /* if(isEdit){ */
-            if(kid.user._id == req.user._id){
-                const resMeasures = await MeasureController.loadAllMeasures(kid)
-                //console.log(">>>loadKid"+JSON.stringify(x))
-                if (!resMeasures.err) {
-                    kid.measures = resMeasures.measures
-                    res.status(200).json({
-                        data: kid,
-                    });
-                } else {
-                    res.status(400).send({ message: 'Problema ao obter medidas',});
-                }
+        if(kid.user._id == req.user._id){
+            const resMeasures = await MeasureController.loadAllMeasures(kid)
+            if (!resMeasures.err) {
+                kid.measures = resMeasures.measures
+                res.status(200).json({
+                    data: kid,
+                });
             } else {
-                res.status(403).send({ message: 'Acesso negado', });
+                res.status(400).send({ message: 'Problema ao obter medidas',});
             }
-        /* } else {
-            res.status(200).json({
-                data: kid,
-            });
-        } */
+        } else {
+            res.status(403).send({ message: 'Acesso negado', });
+        }
     } catch (err){
         res.status(400).send({"message": "Erro ao buscar criança"});
     }
 }
 
-
 exports.loadKidByMeasure = async (req, res) => {
     const measureId = req.params.id;
     try {
-        const m   = await MeasureController.loadMeasure(measureId)
+        const m         = await MeasureController.loadMeasure(measureId)
         const kid       = await Kid.findOne({_id: m.measure.kid}).exec();
         kid.user        = await User.findById(kid.user);
         if(kid.user._id == req.user._id){
@@ -93,18 +81,21 @@ exports.createKid = async (req, res) => {
         user: req.user._id
     });
 
-    //console.log(newKid);
-    //console.log(JSON.stringify(newKid));
-
     try {
-        const savedKid  = await newKid.save();
-        //console.log("kkkkkkk "+JSON.stringify(savedKid))
-        const errorM    = await MeasureController.createBlankMeasures(savedKid)
-        if (!errorM) {
-            res.status(200).json({"message": "Criança cadastrada com sucesso"});
-        } else {
-            res.status(400).json({"message": "Erro ao cadastastrar as medidas"});
+        const kidExist = await Kid.findOne({name: nameUpper, user: req.user._id});
+        if(kidExist) {
+            return res.status(201).send({"message": "Criança já registrada"});
         }
+        const savedKid  = await newKid.save();
+        const errorM    = await MeasureController.createBlankMeasures(savedKid)
+        if (errorM) {
+            return res.status(400).json({"message": "Erro ao inicializar tabela de medidas"});
+        }
+        const errorV    = await VaccineController.createSusVaccines(savedKid)
+        if (errorV) {
+            return res.status(400).json({"message": "Erro ao inicializar o calendário de vacinas do SUS"});
+        }
+        res.status(200).json({"message": "Criança cadastrada com sucesso"});
     } catch (err){
         res.status(400).json({"message": "Erro ao registrar criança"});
     }
