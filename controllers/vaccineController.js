@@ -2,7 +2,6 @@ const Kid       = require('../models/Kid');
 const Vaccine   = require('../models/Vaccine');
 
 exports.loadAllVaccines = async (req) => {
-    //console.log("loadAllVaccines >>>"+req)
     let response = {
         vaccines :  null,
         err:        null
@@ -13,11 +12,9 @@ exports.loadAllVaccines = async (req) => {
             await SusVaccines(req)
             response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
         }
-        //console.log("loadAllVaccines >>>"+JSON.stringify(response))
         return response
     } catch (err){
         response.err        = err
-        //console.log(err)
         return response;
     }
 }
@@ -50,6 +47,7 @@ function addMonths (dateToInc, inc) {
     let day     = new Date(dateToInc).getDate()
     let month   = new Date(dateToInc).getMonth()
     let year    = new Date(dateToInc).getFullYear()
+
     if (inc > 0) {
         do {
             if (inc > 12) {
@@ -86,7 +84,7 @@ const susVaccines = [
                         {
                             dueMonth:       0,
                             name:           "BCG (dose única)",
-                            description:    "Contra as formas graves da tuberculose (miliar e meníngea) (bacilo de Calmette-Guérin). \n Deverá ser aplicada o mais precocemente possível, de preferência ainda na maternidade, em recém-nascidos com peso maior ou igual a 2.000 g."
+                            description:    "Previne contra as formas graves da tuberculose (miliar e meníngea) (bacilo de Calmette-Guérin). \n Deverá ser aplicada o mais precocemente possível, de preferência ainda na maternidade, em recém-nascidos com peso maior ou igual a 2.000 g."
                         },
                         {
                             dueMonth:       0,

@@ -112,7 +112,6 @@ exports.createKid = async (req, res) => {
 }
 
 const deleteKid = async (kidToDelete) => {
-    console.log("deleteKid > kidToDelete._id >>> "+kidToDelete._id)
     try {
         await kidToDelete.deleteOne()
         await Measure.deleteMany({kid: kidToDelete._id}).exec();

@@ -2,7 +2,6 @@ const Kid       = require('../models/Kid');
 const Measure   = require('../models/Measure');
 
 exports.loadAllMeasures = async (req) => {
-    //console.log("loadAllMeasures >>>"+req)
     let response = {
         measures :  null,
         err:        null
@@ -13,11 +12,9 @@ exports.loadAllMeasures = async (req) => {
             await blankMeasures(req)
             response.measures = await Measure.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
         }
-        //console.log("loadAllMeasures >>>"+JSON.stringify(response))
         return response
     } catch (err){
         response.err        = err
-        //console.log(err)
         return response;
     }
 }
@@ -105,7 +102,7 @@ exports.updateMeasure = async (req, res) => {
         isSetH: ( req.body.head > 0 ? true : false ),
     }
 
-    const isDataOk = () => {  // ### TO SET LIMITS BASED IN WHO DATA
+    const isDataOk = () => {  // ### TO SET LIMITS BASED ON WHO DATA TABLES
 
         if (body.weight === ''   ||
             body.weight === undefined   || body.weight < 0      || body.weight > 25000) {
@@ -126,7 +123,7 @@ exports.updateMeasure = async (req, res) => {
 
     try {
         if (!isDataOk()) {
-            return res.status(400).send({"message": "Alguma medida está acima ou abaixo do aceitável"});
+            return res.status(400).send({"message": "Alguma medida informada está acima ou abaixo do aceitável"});
         }
         const m = await Measure.findOne(filter).exec();
         const k = await Kid.findOne({_id: m.kid}).exec();
