@@ -1,5 +1,7 @@
 const User              = require('../models/User');
 const Kid               = require('../models/Kid');
+const Measure           = require('../models/Measure');
+const Vaccine           = require('../models/Vaccine');
 const MeasureController = require('../controllers/measureController');
 const VaccineController = require('../controllers/vaccineController');
 
@@ -19,13 +21,19 @@ exports.loadKid = async (req, res) => {
         kid.user  = await User.findById(kid.user);
         if(kid.user._id == req.user._id){
             const resMeasures = await MeasureController.loadAllMeasures(kid)
-            if (!resMeasures.err) {
-                kid.measures = resMeasures.measures
-                res.status(200).json({
-                    data: kid,
-                });
-            } else {
+            if (resMeasures.err) {
                 res.status(400).send({ message: 'Problema ao obter medidas',});
+            } else {
+                kid.measures = resMeasures.measures
+                const resVaccines = await VaccineController.loadAllVaccines(kid)
+                if (resVaccines.err) {
+                    res.status(400).send({ message: 'Problema ao obter vacinas',});
+                } else {
+                    kid.vaccines = resVaccines.vaccines
+                    res.status(200).json({
+                        data: kid,
+                    });
+                }
             }
         } else {
             res.status(403).send({ message: 'Acesso negado', });
@@ -89,14 +97,27 @@ exports.createKid = async (req, res) => {
         const savedKid  = await newKid.save();
         const errorM    = await MeasureController.createBlankMeasures(savedKid)
         if (errorM) {
-            return res.status(400).json({"message": "Erro ao inicializar tabela de medidas"});
+            await   deleteKid(savedKid)
+            return  res.status(400).json({"message": "Erro ao inicializar tabela de medidas"});
         }
         const errorV    = await VaccineController.createSusVaccines(savedKid)
         if (errorV) {
-            return res.status(400).json({"message": "Erro ao inicializar o calendário de vacinas do SUS"});
+            await   deleteKid(savedKid)
+            return  res.status(400).json({"message": "Erro ao inicializar o calendário de vacinas do SUS"});
         }
         res.status(200).json({"message": "Criança cadastrada com sucesso"});
     } catch (err){
         res.status(400).json({"message": "Erro ao registrar criança"});
+    }
+}
+
+const deleteKid = async (kidToDelete) => {
+    console.log("deleteKid > kidToDelete._id >>> "+kidToDelete._id)
+    try {
+        await kidToDelete.deleteOne()
+        await Measure.deleteMany({kid: kidToDelete._id}).exec();
+        await Vaccine.deleteMany({kid: kidToDelete._id}).exec();
+    } catch (err){
+        return err
     }
 }

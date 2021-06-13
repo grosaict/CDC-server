@@ -16,7 +16,7 @@ const VaccineSchema = new Schema({
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
     applicationDate: {
         type: Date,

@@ -23,23 +23,20 @@ exports.loadAllMeasures = async (req) => {
 }
 
 exports.loadMeasure = async (idMeasure) => {
-    //console.log("loadMeasure idMeasure>>>"+idMeasure)
     let response = {
         measure:    null,
         err:        null
     }
     try {
         response.measure = await Measure.findOne({_id: idMeasure}).exec();
-        //console.log("loadMeasure response.measure>>>"+response.measure)
         return response
     } catch (err){
         response.err = err
-        //console.log("loadMeasure err>>>"+err)
         return response;
     }
 }
 
-exports.createBlankMeasures = async (req) => { blankMeasures(req) }
+exports.createBlankMeasures = async (req) => { return blankMeasures(req) }
 
 const blankMeasures = async (req) => {
     const {_id, birth}  = req;
@@ -65,7 +62,6 @@ const blankMeasures = async (req) => {
             await blankItem.save();
         }
      } catch (err){
-        console.log(err)
         return err;
     }
 
@@ -98,7 +94,7 @@ const blankMeasures = async (req) => {
 
 exports.updateMeasure = async (req, res) => {
     const filter = { _id: req.params.id }; // measureId
-    const userId    = req.body.kid.user._id;
+    const userId    = req.user._id;
 
     const body      = {
         weight: req.body.weight,

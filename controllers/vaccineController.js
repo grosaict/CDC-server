@@ -1,59 +1,85 @@
 const Kid       = require('../models/Kid');
 const Vaccine   = require('../models/Vaccine');
 
-exports.createSusVaccines = async (req) => { SusVaccines(req) }
+exports.loadAllVaccines = async (req) => {
+    //console.log("loadAllVaccines >>>"+req)
+    let response = {
+        vaccines :  null,
+        err:        null
+    }
+    try {
+        response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
+        if (Object.keys(response.vaccines).length === 0){
+            await SusVaccines(req)
+            response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
+        }
+        //console.log("loadAllVaccines >>>"+JSON.stringify(response))
+        return response
+    } catch (err){
+        response.err        = err
+        //console.log(err)
+        return response;
+    }
+}
+
+exports.createSusVaccines = async (req) => { return SusVaccines(req) }
 
 const SusVaccines = async (req) => {
     const {_id, birth}  = req;
-    const birthDay      = new Date(birth).getDate()
-
     let newSUS
 
-    try {
-        for (let index = 0; index < susVaccines.length; index++) {
-            //console.log(susVaccines[index])
-            newSUS = new Vaccine({
-                dueMonth:       susVaccines[index].dueMonth,
-                scheduleDate:   birth, // <<<<
-                name:           susVaccines[index].name,
-                description:    susVaccines[index].description,
-                isSUS:          true,
-                isSet:          false,
-                kid:            _id
-            })
-            console.log(newSUS)
-            // await newSUS.save()
+    for (let index = 0; index < susVaccines.length; index++) {
+        newSUS = new Vaccine({
+            dueMonth:       susVaccines[index].dueMonth,
+            scheduleDate:   addMonths(birth, susVaccines[index].dueMonth),
+            name:           susVaccines[index].name,
+            description:    susVaccines[index].description,
+            isSUS:          true,
+            isSet:          false,
+            kid:            _id
+        })
+        try {
+            await newSUS.save()
+        } catch (err){
+            return err
         }
-     } catch (err){
-        console.log(err)
-        return err;
     }
+}
 
-    function addOneMonth (d) {
-        let day = birthDay
-        let month = d.getMonth() + 1
-        let year = d.getFullYear()
+function addMonths (dateToInc, inc) {
+    let day     = new Date(dateToInc).getDate()
+    let month   = new Date(dateToInc).getMonth()
+    let year    = new Date(dateToInc).getFullYear()
+    if (inc > 0) {
+        do {
+            if (inc > 12) {
+                inc = inc - 12
+                year++
+            }
+        } while (inc > 12)
+
+        month = month + inc
 
         if (month > 11) {
-            month = 0
+            month = month - 12
             year++
-        } else {
-            if (day > 28) {
-                switch (month) {
-                    case 1:
-                        day = 28;
-                        break;
-                    case 3:
-                    case 5:
-                    case 8:
-                    case 10:
-                        if (day > 30) { day = 30 }
-                        break;
-                }
+        }
+
+        if (day > 28) {
+            switch (month) {
+                case 1:
+                    day = 28;
+                    break;
+                case 3:
+                case 5:
+                case 8:
+                case 10:
+                    if (day > 30) { day = 30 }
+                    break;
             }
         }
-        return new Date(year, month, day);
     }
+    return new Date(year, month, day);
 }
 
 const susVaccines = [
