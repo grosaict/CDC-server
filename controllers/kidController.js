@@ -52,7 +52,7 @@ exports.loadKidByMeasure = async (req, res) => {
         if(kid.user._id == req.user._id){
             const measures = await MeasureController.loadAllMeasures(kid)
             if (!measures.err) {
-                kid.measures = measures.measures
+                //kid.measures = measures.measures
                 res.status(200).json({
                     data: {
                         measure:    m.measure,
@@ -61,6 +61,34 @@ exports.loadKidByMeasure = async (req, res) => {
                 });
             } else {
                 res.status(400).send({ message: 'Problema ao obter medidas',});
+            }
+        } else {
+            res.status(403).send({ message: 'Acesso negado', });
+        }
+
+    } catch (err){
+        res.status(400).send({"message": "Erro ao buscar criança"});
+    }
+}
+
+exports.loadKidByVaccine = async (req, res) => {
+    const vaccineId = req.params.id;
+    try {
+        const v         = await VaccineController.loadVaccine(vaccineId)
+        const kid       = await Kid.findOne({_id: v.vaccine.kid}).exec();
+        kid.user        = await User.findById(kid.user);
+        if(kid.user._id == req.user._id){
+            const vaccines = await VaccineController.loadAllVaccines(kid)
+            if (!vaccines.err) {
+                //kid.vaccines = vaccines.vaccines
+                res.status(200).json({
+                    data: {
+                        vaccine:    v.vaccine,
+                        kid:        kid
+                    }
+                });
+            } else {
+                res.status(400).send({ message: 'Problema ao obter vacinas',});
             }
         } else {
             res.status(403).send({ message: 'Acesso negado', });

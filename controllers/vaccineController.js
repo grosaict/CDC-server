@@ -19,6 +19,20 @@ exports.loadAllVaccines = async (req) => {
     }
 }
 
+exports.loadVaccine = async (idVaccine) => {
+    let response = {
+        vaccine:    null,
+        err:        null
+    }
+    try {
+        response.vaccine = await Vaccine.findOne({_id: idVaccine}).exec();
+        return response
+    } catch (err){
+        response.err = err
+        return response;
+    }
+}
+
 exports.createSusVaccines = async (req) => { return SusVaccines(req) }
 
 const SusVaccines = async (req) => {
@@ -41,6 +55,55 @@ const SusVaccines = async (req) => {
             return err
         }
     }
+}
+
+exports.updateVaccine= async (req, res) => {
+    /* const filter = { _id: req.params.id }; // measureId
+    const userId    = req.user._id;
+
+    const body      = {
+        weight: req.body.weight,
+        isSetW: ( req.body.weight > 0 ? true : false ),
+        length: req.body.length,
+        isSetL: ( req.body.length > 0 ? true : false ),
+        head:   req.body.head,
+        isSetH: ( req.body.head > 0 ? true : false ),
+    }
+
+    const isDataOk = () => {  // ### TO SET LIMITS BASED ON WHO DATA TABLES
+
+        if (body.weight === ''   ||
+            body.weight === undefined   || body.weight < 0      || body.weight > 25000) {
+            return false
+        }
+
+        if (!body.length                || body.length === ''   ||
+            body.length === undefined   || body.length < 0      || body.length > 150) {
+            return false
+        }
+
+        if (!body.head                  || body.head === ''     ||
+            body.head === undefined     || body.head < 0        || body.head > 70) {
+            return false
+        }
+        return true
+    }
+
+    try {
+        if (!isDataOk()) {
+            return res.status(400).send({"message": "Alguma medida informada está acima ou abaixo do aceitável"});
+        }
+        const m = await Measure.findOne(filter).exec();
+        const k = await Kid.findOne({_id: m.kid}).exec();
+        if(userId != k.user._id){
+            return res.status(403).send({ message: 'Acesso negado', });
+        }
+        await Measure.findOneAndUpdate(filter, body).exec();
+        res.status(200).json({"message": "Medias atualizadas com sucesso"});
+    } catch (err){
+        res.status(400).send({"message": "Erro ao atualizar medidas"});
+    } */
+    res.status(200).json({"message": "Vaccina atualizada com sucesso"});
 }
 
 function addMonths (dateToInc, inc) {
@@ -84,12 +147,12 @@ const susVaccines = [
                         {
                             dueMonth:       0,
                             name:           "BCG (dose única)",
-                            description:    "Previne contra as formas graves da tuberculose (miliar e meníngea) (bacilo de Calmette-Guérin). \n Deverá ser aplicada o mais precocemente possível, de preferência ainda na maternidade, em recém-nascidos com peso maior ou igual a 2.000 g."
+                            description:    "Previne contra as formas graves da tuberculose (miliar e meníngea) (bacilo de Calmette-Guérin). Deverá ser aplicada o mais precocemente possível, de preferência ainda na maternidade, em recém-nascidos com peso maior ou igual a 2.000 g."
                         },
                         {
                             dueMonth:       0,
                             name:           "Hepatite B (dose ao nascer)",
-                            description:    "Previne contra hepatite B (recombinante). \n Aplicar a primeira dose nas primeiras 12 horas de vida"
+                            description:    "Previne contra hepatite B (recombinante). Aplicar a primeira dose nas primeiras 12 horas de vida"
                         },
                         {
                             dueMonth:       2,

@@ -131,7 +131,7 @@ exports.updateMeasure = async (req, res) => {
             return res.status(403).send({ message: 'Acesso negado', });
         }
         await Measure.findOneAndUpdate(filter, body).exec();
-        res.status(200).json({"message": "Medias atualizadas com sucesso"});
+        res.status(200).json({"message": "Medidas atualizadas com sucesso"});
     } catch (err){
         res.status(400).send({"message": "Erro ao atualizar medidas"});
     }

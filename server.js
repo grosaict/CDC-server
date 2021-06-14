@@ -16,10 +16,11 @@ app.use(cors())
 app.use(morgan('dev'));
 
 //Importing routes
-const kidRoute = require('./routes/kid');
-const measureRoute = require('./routes/measure');
-const loginRoute = require('./routes/login');
-const userRoute = require('./routes/user');
+const kidRoute      = require('./routes/kid');
+const measureRoute  = require('./routes/measure');
+const vaccineRoute  = require('./routes/vaccine');
+const loginRoute    = require('./routes/login');
+const userRoute     = require('./routes/user');
 
 /* app.use(
   "/files",
@@ -37,10 +38,11 @@ mongoose.connect(
 mongoose.set('useCreateIndex', true);
 
 //Make routes available
-app.use('/api/kid', kidRoute);
+app.use('/api/kid',     kidRoute);
 app.use('/api/measure', measureRoute);
-app.use('/api/login', loginRoute);
-app.use('/api/user', userRoute);
+app.use('/api/vaccine', vaccineRoute);
+app.use('/api/login',   loginRoute);
+app.use('/api/user',    userRoute);
 
 const port = process.env.PORT;
 
