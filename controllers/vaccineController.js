@@ -57,53 +57,114 @@ const SusVaccines = async (req) => {
     }
 }
 
+exports.newVaccine = async (req, res) => {
+    /* const { name, birth , gender } = req.body;
+
+    const nameUpper     = name.toUpperCase()
+    const genderUpper   = gender.toUpperCase()
+    const birthDay      = new Date(birth).getDate()
+    const birthMonth    = new Date(birth).getMonth()
+    const birthYear     = new Date(birth).getFullYear()
+    const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
+
+    const newKid = new Kid({
+        name: nameUpper,
+        birth: birthGMT3,
+        gender: genderUpper,
+        measures: new Array(),
+        user: req.user._id
+    });
+
+    try {
+        const kidExist = await Kid.findOne({name: nameUpper, user: req.user._id});
+        if(kidExist) {
+            return res.status(201).send({"message": "Criança já registrada"});
+        }
+        const savedKid  = await newKid.save();
+        const errorM    = await MeasureController.createBlankMeasures(savedKid)
+        if (errorM) {
+            await   deleteKid(savedKid)
+            return  res.status(400).json({"message": "Erro ao inicializar tabela de medidas"});
+        }
+        const errorV    = await VaccineController.createSusVaccines(savedKid)
+        if (errorV) {
+            await   deleteKid(savedKid)
+            return  res.status(400).json({"message": "Erro ao inicializar o calendário de vacinas do SUS"});
+        }
+        res.status(200).json({"message": "Criança cadastrada com sucesso"});
+    } catch (err){
+        res.status(400).json({"message": "Erro ao registrar criança"});
+    } */
+    res.status(200).json({"message": "Vacina registrada com sucesso"});
+}
+
 exports.updateVaccine= async (req, res) => {
-    /* const filter = { _id: req.params.id }; // measureId
-    const userId    = req.user._id;
+    const filter            = { _id: req.params.id } // vaccineId
+    const userId            = req.user._id
 
-    const body      = {
-        weight: req.body.weight,
-        isSetW: ( req.body.weight > 0 ? true : false ),
-        length: req.body.length,
-        isSetL: ( req.body.length > 0 ? true : false ),
-        head:   req.body.head,
-        isSetH: ( req.body.head > 0 ? true : false ),
-    }
+    const dueMonth          = req.body.dueMonth
+    const name              = req.body.name
+    const description       = req.body.description
+    const applicationDate   = new Date(req.body.applicationDate)
+    const isSet             = req.body.isSet
 
-    const isDataOk = () => {  // ### TO SET LIMITS BASED ON WHO DATA TABLES
+    const isDataOk = (k) => {  // ### TO SET LIMITS BASED ON WHO DATA TABLES
+        const kidBirth  = k.birth
+        const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate())
 
-        if (body.weight === ''   ||
-            body.weight === undefined   || body.weight < 0      || body.weight > 25000) {
+        if (!name              || name === ''             ||
+            name === undefined) {
             return false
         }
 
-        if (!body.length                || body.length === ''   ||
-            body.length === undefined   || body.length < 0      || body.length > 150) {
+        if (dueMonth === ''    || dueMonth === undefined  ||
+            dueMonth < 0 ) {
             return false
         }
 
-        if (!body.head                  || body.head === ''     ||
-            body.head === undefined     || body.head < 0        || body.head > 70) {
+        if (isSet !== true     && isSet !== false) {
             return false
+        }
+
+        if (isSet) {
+            if(!applicationDate ||
+                applicationDate === '' ||
+                applicationDate === undefined ||
+                (applicationDate.getTime() - kidBirth.getTime()) < 0 || // applicationDate  < kidBirth
+                (today.getTime() - applicationDate.getTime()) < 0 ){    // today            < applicationDate
+                return false
+            }
         }
         return true
     }
 
     try {
-        if (!isDataOk()) {
+        const v = await Vaccine.findOne(filter).exec();
+        const k = await Kid.findOne({_id: v.kid}).exec();
+        if (!isDataOk(k)) {
             return res.status(400).send({"message": "Alguma medida informada está acima ou abaixo do aceitável"});
         }
-        const m = await Measure.findOne(filter).exec();
-        const k = await Kid.findOne({_id: m.kid}).exec();
+
+        const body      = {
+            dueMonth:           dueMonth,
+            scheduleDate:       addMonths(k.birth, dueMonth),
+            name:               name,
+            description:        description,
+            isSet:              isSet,
+        }
+
+        isSet ? body.applicationDate = applicationDate : null
+
         if(userId != k.user._id){
             return res.status(403).send({ message: 'Acesso negado', });
         }
-        await Measure.findOneAndUpdate(filter, body).exec();
-        res.status(200).json({"message": "Medias atualizadas com sucesso"});
+        await Vaccine.findOneAndUpdate(filter, body).exec();
+        res.status(200).json({"message": "Vacina atualizada com sucesso"});
     } catch (err){
-        res.status(400).send({"message": "Erro ao atualizar medidas"});
-    } */
-    res.status(200).json({"message": "Vaccina atualizada com sucesso"});
+        console.log("err >>>")
+        console.log(err)
+        res.status(400).send({"message": "Erro ao atualizar vacina"});
+    }
 }
 
 function addMonths (dateToInc, inc) {
