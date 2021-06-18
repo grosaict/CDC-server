@@ -1,5 +1,5 @@
 const tokenController = require('../controllers/tokenController');
-const {loginValidation, isEmail} = require('../validations');
+const { loginValidation, isEmail } = require('../validations');
 
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
@@ -19,14 +19,14 @@ exports.login = async (req, res) => {
     }
 
     if(!user) {
-        return res.status(403).json({"message": "Este usuário não existe"});
+        return res.status(403).json({ status: 403, message: "Este usuário não existe"});
     }
 
     const validPassword = await bcrypt.compare(data.password, user.password);
     if(!validPassword){
-        return res.status(403).json({"message": "Senha incorreta"});
+        return res.status(403).json({ status: 403, message: "Senha incorreta"});
     }
 
     const token = tokenController.generateToken(user);
-    res.status(200).json({"token": token});
+    res.status(200).json({ "token": token });
 };

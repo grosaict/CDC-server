@@ -14,6 +14,10 @@ const VaccineSchema = new Schema({
         type: String,
         required: true
     },
+    nameLower: {        // TO FACILITATE THE USE IN CASE INSENSITIVE QUERIES
+        type: String,
+        required: true
+    },
     description: {
         type: String,
         required: false

@@ -12,8 +12,13 @@ exports.loadAllVaccines = async (req) => {
             await SusVaccines(req)
             response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
         }
+        response.status     = 200
+        response.message    = "Sucesso"
         return response
     } catch (err){
+        response.status     = 400
+        response.message    = "Erro"
+        response.error      = err
         response.err        = err
         return response;
     }
@@ -26,9 +31,14 @@ exports.loadVaccine = async (idVaccine) => {
     }
     try {
         response.vaccine = await Vaccine.findOne({_id: idVaccine}).exec();
+        response.status     = 200
+        response.message    = "Sucesso"
         return response
     } catch (err){
-        response.err = err
+        response.status     = 400
+        response.message    = "Erro"
+        response.error      = err
+        response.err        = err
         return response;
     }
 }
@@ -39,87 +49,127 @@ const SusVaccines = async (req) => {
     const {_id, birth}  = req;
     let newSUS
 
-    for (let index = 0; index < susVaccines.length; index++) {
-        newSUS = new Vaccine({
-            dueMonth:       susVaccines[index].dueMonth,
-            scheduleDate:   addMonths(birth, susVaccines[index].dueMonth),
-            name:           susVaccines[index].name,
-            description:    susVaccines[index].description,
-            isSUS:          true,
-            isSet:          false,
-            kid:            _id
-        })
-        try {
+    let response = {
+        vaccine:    null,
+        err:        null
+    }
+
+    try {
+        for (let index = 0; index < susVaccines.length; index++) {
+            newSUS = new Vaccine({
+                dueMonth:       susVaccines[index].dueMonth,
+                scheduleDate:   addMonths(birth, susVaccines[index].dueMonth),
+                name:           susVaccines[index].name,
+                nameLower:      susVaccines[index].name.toLowerCase(),
+                description:    susVaccines[index].description,
+                isSUS:          true,
+                isSet:          false,
+                kid:            _id
+            })
             await newSUS.save()
-        } catch (err){
-            return err
         }
+        response.status     = 200
+        response.message    = "Sucesso"
+        return response
+    } catch (err){
+        response.status     = 400
+        response.message    = "Erro"
+        response.error      = err
+        return err
     }
 }
 
 exports.newVaccine = async (req, res) => {
-    /* const { name, birth , gender } = req.body;
-
-    const nameUpper     = name.toUpperCase()
-    const genderUpper   = gender.toUpperCase()
-    const birthDay      = new Date(birth).getDate()
-    const birthMonth    = new Date(birth).getMonth()
-    const birthYear     = new Date(birth).getFullYear()
-    const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
-
-    const newKid = new Kid({
-        name: nameUpper,
-        birth: birthGMT3,
-        gender: genderUpper,
-        measures: new Array(),
-        user: req.user._id
-    });
-
-    try {
-        const kidExist = await Kid.findOne({name: nameUpper, user: req.user._id});
-        if(kidExist) {
-            return res.status(201).send({"message": "Criança já registrada"});
-        }
-        const savedKid  = await newKid.save();
-        const errorM    = await MeasureController.createBlankMeasures(savedKid)
-        if (errorM) {
-            await   deleteKid(savedKid)
-            return  res.status(400).json({"message": "Erro ao inicializar tabela de medidas"});
-        }
-        const errorV    = await VaccineController.createSusVaccines(savedKid)
-        if (errorV) {
-            await   deleteKid(savedKid)
-            return  res.status(400).json({"message": "Erro ao inicializar o calendário de vacinas do SUS"});
-        }
-        res.status(200).json({"message": "Criança cadastrada com sucesso"});
-    } catch (err){
-        res.status(400).json({"message": "Erro ao registrar criança"});
-    } */
-    res.status(200).json({"message": "Vacina registrada com sucesso"});
-}
-
-exports.updateVaccine= async (req, res) => {
-    const filter            = { _id: req.params.id } // vaccineId
     const userId            = req.user._id
+    const { dueMonth, name, description , applicationDate, isSet, kid } = req.body;
 
-    const dueMonth          = req.body.dueMonth
-    const name              = req.body.name
-    const description       = req.body.description
-    const applicationDate   = new Date(req.body.applicationDate)
-    const isSet             = req.body.isSet
+    //console.log("newVaccine > req.body >>>")
+    //console.log(req.body)
 
-    const isDataOk = (k) => {  // ### TO SET LIMITS BASED ON WHO DATA TABLES
-        const kidBirth  = k.birth
+    const isDataOk = () => {
         const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate())
+
+        if (dueMonth === ''    || dueMonth === undefined  ||
+            dueMonth < 0 ) {
+            return false
+        }
 
         if (!name              || name === ''             ||
             name === undefined) {
             return false
         }
 
-        if (dueMonth === ''    || dueMonth === undefined  ||
-            dueMonth < 0 ) {
+        if (isSet !== true     && isSet !== false) {
             return false
+        }
+
+        if (isSet) {
+            if(!applicationDate ||
+                applicationDate === '' ||
+                applicationDate === undefined ||
+                (applicationDate.getTime() - kid.birth.getTime()) < 0 || // applicationDate  < kid.birth
+                (today.getTime() - applicationDate.getTime()) < 0 ){     // today            < applicationDate
+                return false
+            }
+        }
+        return true
+    }
+
+    try {
+        const vacExist = await Vaccine.findOne({ nameLower: name.toLowerCase() , kid: kid._id }).exec();
+
+        if(vacExist) {
+            return res.status(201).json({ status: 201, message: "Vacina já registrada"});
+        }
+
+        if (!isDataOk) {
+            return res.status(400).json({ status: 400, message: "Problema com os dados digitados"});
+        }
+
+        const newVac = new Vaccine({
+            dueMonth:           dueMonth,
+            scheduleDate:       addMonths(kid.birth, dueMonth),
+            name:               name,
+            nameLower:          name.toLowerCase(),
+            description:        description,
+            applicationDate:    isSet ? applicationDate : null,
+            isSUS:              false,
+            isSet:              isSet,
+            kid:                kid._id,
+        });
+
+        console.log("newVaccine > newVac >>>")
+        console.log(newVac)
+
+        await newVac.save();
+        
+        res.status(200).json({ status: 200, message: "Vacina cadastrada com sucesso"});
+    } catch (err){
+        res.status(400).json({ status: 400, message: "Erro ao cadastrar vacina", error: err });
+    }
+}
+
+exports.updateVaccine= async (req, res) => {
+    const filter            = { _id: req.params.id } // vaccineId
+    const userId            = req.user._id
+    const { dueMonth, name, description , isSet } = req.body;
+    const applicationDate   = new Date(req.body.applicationDate)
+
+
+    const isDataOk = (k, v) => {
+        const kidBirth  = k.birth
+        const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate())
+
+        if (!v.isSUS) {
+            if (!name              || name === ''             ||
+                name === undefined) {
+                return false
+            }
+
+            if (dueMonth === ''    || dueMonth === undefined  ||
+                dueMonth < 0 ) {
+                return false
+            }
         }
 
         if (isSet !== true     && isSet !== false) {
@@ -140,30 +190,41 @@ exports.updateVaccine= async (req, res) => {
 
     try {
         const v = await Vaccine.findOne(filter).exec();
+        if (!v) {
+            return res.status(400).send({ status: 400, message: "Erro a localizar vacina"});
+        }
         const k = await Kid.findOne({_id: v.kid}).exec();
-        if (!isDataOk(k)) {
-            return res.status(400).send({"message": "Alguma medida informada está acima ou abaixo do aceitável"});
+        if (!k) {
+            return res.status(400).send({ status: 400, message: "Erro a localizar criança"});
+        }
+        if (!isDataOk(k, v)) {
+            return res.status(400).send({ status: 400, message: "Alguma medida informada está acima ou abaixo do aceitável"});
         }
 
         const body      = {
-            dueMonth:           dueMonth,
-            scheduleDate:       addMonths(k.birth, dueMonth),
-            name:               name,
-            description:        description,
             isSet:              isSet,
+            lastUpdate:         new Date(),
         }
 
-        isSet ? body.applicationDate = applicationDate : null
+        if (!v.isSUS) {
+            body.dueMonth       = dueMonth
+            body.scheduleDate   = addMonths(k.birth, dueMonth)
+            body.name           = name
+            body.nameLower      = name.toLowerCase()
+            body.description    = description
+        }
+
+        isSet ? body.applicationDate = applicationDate : body.applicationDate = null
 
         if(userId != k.user._id){
-            return res.status(403).send({ message: 'Acesso negado', });
+            return res.status(403).send({ status: 403, message: 'Acesso negado', });
         }
         await Vaccine.findOneAndUpdate(filter, body).exec();
-        res.status(200).json({"message": "Vacina atualizada com sucesso"});
+        res.status(200).json({ status: 200, message: "Vacina atualizada com sucesso"});
     } catch (err){
         console.log("err >>>")
         console.log(err)
-        res.status(400).send({"message": "Erro ao atualizar vacina"});
+        res.status(400).send({ status: 400, message: "Erro ao atualizar vacina", error: err });
     }
 }
 

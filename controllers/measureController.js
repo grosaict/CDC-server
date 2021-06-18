@@ -12,8 +12,13 @@ exports.loadAllMeasures = async (req) => {
             await blankMeasures(req)
             response.measures = await Measure.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
         }
+        response.status     = 200
+        response.message    = "Sucesso"
         return response
     } catch (err){
+        response.status     = 400
+        response.message    = "Erro"
+        response.error      = err
         response.err        = err
         return response;
     }
@@ -25,10 +30,15 @@ exports.loadMeasure = async (idMeasure) => {
         err:        null
     }
     try {
-        response.measure = await Measure.findOne({_id: idMeasure}).exec();
+        response.measure    = await Measure.findOne({_id: idMeasure}).exec();
+        response.status     = 200
+        response.message    = "Sucesso"
         return response
     } catch (err){
-        response.err = err
+        response.status     = 400
+        response.message    = "Erro"
+        response.error      = err
+        response.err        = err
         return response;
     }
 }
@@ -42,6 +52,7 @@ const blankMeasures = async (req) => {
     try {
         let sDate       = birth
         let blankItem
+        let response = {}
 
         for (let index = 0; index <= 24; index++) {
             index > 0 ? sDate = addOneMonth(sDate) : false
@@ -58,8 +69,16 @@ const blankMeasures = async (req) => {
             });
             await blankItem.save();
         }
+
+        response.status     = 200
+        response.message    = "Sucesso"
+        return response
      } catch (err){
-        return err;
+        response.status     = 400
+        response.message    = "Erro"
+        response.error      = err
+        response.err        = err
+        return response;
     }
 
     function addOneMonth (d) {
@@ -94,12 +113,13 @@ exports.updateMeasure = async (req, res) => {
     const userId    = req.user._id;
 
     const body      = {
-        weight: req.body.weight,
-        isSetW: ( req.body.weight > 0 ? true : false ),
-        length: req.body.length,
-        isSetL: ( req.body.length > 0 ? true : false ),
-        head:   req.body.head,
-        isSetH: ( req.body.head > 0 ? true : false ),
+        weight:     req.body.weight,
+        isSetW:     ( req.body.weight > 0 ? true : false ),
+        length:     req.body.length,
+        isSetL:     ( req.body.length > 0 ? true : false ),
+        head:       req.body.head,
+        isSetH:     ( req.body.head > 0 ? true : false ),
+        lastUpdate: new Date(),
     }
 
     const isDataOk = () => {  // ### TO SET LIMITS BASED ON WHO DATA TABLES
@@ -123,16 +143,16 @@ exports.updateMeasure = async (req, res) => {
 
     try {
         if (!isDataOk()) {
-            return res.status(400).send({"message": "Alguma medida informada está acima ou abaixo do aceitável"});
+            return res.status(400).send({status: 400, message: "Alguma medida informada está acima ou abaixo do aceitável"});
         }
         const m = await Measure.findOne(filter).exec();
         const k = await Kid.findOne({_id: m.kid}).exec();
         if(userId != k.user._id){
-            return res.status(403).send({ message: 'Acesso negado', });
+            return res.status(403).send({ status: 403, message: 'Acesso negado' });
         }
         await Measure.findOneAndUpdate(filter, body).exec();
-        res.status(200).json({"message": "Medidas atualizadas com sucesso"});
+        res.status(200).json({ status: 200, message: "Medidas atualizadas com sucesso" });
     } catch (err){
-        res.status(400).send({"message": "Erro ao atualizar medidas"});
+        res.status(400).send({ status: 400, message: "Erro ao atualizar medidas", error: err });
     }
 }
