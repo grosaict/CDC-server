@@ -3,8 +3,7 @@ const Vaccine   = require('../models/Vaccine');
 
 exports.loadAllVaccines = async (req) => {
     let response = {
-        vaccines :  null,
-        err:        null
+        vaccines :  null
     }
     try {
         response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
@@ -16,18 +15,18 @@ exports.loadAllVaccines = async (req) => {
         response.message    = "Sucesso"
         return response
     } catch (err){
+        console.log("loadAllVaccines > err >>>")
+        console.log(err)
         response.status     = 400
         response.message    = "Erro"
         response.error      = err
-        response.err        = err
         return response;
     }
 }
 
 exports.loadVaccine = async (idVaccine) => {
     let response = {
-        vaccine:    null,
-        err:        null
+        vaccine:    null
     }
     try {
         response.vaccine = await Vaccine.findOne({_id: idVaccine}).exec();
@@ -35,10 +34,11 @@ exports.loadVaccine = async (idVaccine) => {
         response.message    = "Sucesso"
         return response
     } catch (err){
+        console.log("loadVaccine > err >>>")
+        console.log(err)
         response.status     = 400
         response.message    = "Erro"
         response.error      = err
-        response.err        = err
         return response;
     }
 }
@@ -46,12 +46,11 @@ exports.loadVaccine = async (idVaccine) => {
 exports.createSusVaccines = async (req) => { return SusVaccines(req) }
 
 const SusVaccines = async (req) => {
-    const {_id, birth}  = req;
+    const {_id, name, birth}  = req;
     let newSUS
 
     let response = {
-        vaccine:    null,
-        err:        null
+        vaccine:    null
     }
 
     try {
@@ -66,25 +65,27 @@ const SusVaccines = async (req) => {
                 isSet:          false,
                 kid:            _id
             })
+            if (name === 'AYLA' && newSUS.dueMonth <= 9 ){
+                newSUS.applicationDate  = susVaccines[index].applicationDate,
+                newSUS.isSet            = true
+            }
             await newSUS.save()
         }
         response.status     = 200
         response.message    = "Sucesso"
         return response
     } catch (err){
+        console.log("SusVaccines > err >>>")
+        console.log(err)
         response.status     = 400
         response.message    = "Erro"
-        response.error      = err
-        return err
+        return response
     }
 }
 
 exports.newVaccine = async (req, res) => {
     const userId            = req.user._id
     const { dueMonth, name, description , applicationDate, isSet, kid } = req.body;
-
-    //console.log("newVaccine > req.body >>>")
-    //console.log(req.body)
 
     const isDataOk = () => {
         const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate())
@@ -116,6 +117,10 @@ exports.newVaccine = async (req, res) => {
     }
 
     try {
+        if(userId !== kid.user._id){
+            return res.status(403).send({ status: 403, message: 'Acesso negado', });
+        }
+
         const vacExist = await Vaccine.findOne({ nameLower: name.toLowerCase() , kid: kid._id }).exec();
 
         if(vacExist) {
@@ -133,18 +138,15 @@ exports.newVaccine = async (req, res) => {
             nameLower:          name.toLowerCase(),
             description:        description,
             applicationDate:    isSet ? applicationDate : null,
-            isSUS:              false,
             isSet:              isSet,
             kid:                kid._id,
         });
 
-        console.log("newVaccine > newVac >>>")
-        console.log(newVac)
-
         await newVac.save();
-        
         res.status(200).json({ status: 200, message: "Vacina cadastrada com sucesso"});
     } catch (err){
+        console.log("newVaccine > err >>>")
+        console.log(err)
         res.status(400).json({ status: 400, message: "Erro ao cadastrar vacina", error: err });
     }
 }
@@ -197,6 +199,11 @@ exports.updateVaccine= async (req, res) => {
         if (!k) {
             return res.status(400).send({ status: 400, message: "Erro a localizar criança"});
         }
+
+        if(userId != k.user._id){
+            return res.status(403).send({ status: 403, message: 'Acesso negado', });
+        }
+
         if (!isDataOk(k, v)) {
             return res.status(400).send({ status: 400, message: "Alguma medida informada está acima ou abaixo do aceitável"});
         }
@@ -216,13 +223,10 @@ exports.updateVaccine= async (req, res) => {
 
         isSet ? body.applicationDate = applicationDate : body.applicationDate = null
 
-        if(userId != k.user._id){
-            return res.status(403).send({ status: 403, message: 'Acesso negado', });
-        }
         await Vaccine.findOneAndUpdate(filter, body).exec();
         res.status(200).json({ status: 200, message: "Vacina atualizada com sucesso"});
     } catch (err){
-        console.log("err >>>")
+        console.log("updateVaccine > err >>>")
         console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao atualizar vacina", error: err });
     }
@@ -269,131 +273,146 @@ const susVaccines = [
                         {
                             dueMonth:       0,
                             name:           "BCG (dose única)",
-                            description:    "Previne contra as formas graves da tuberculose (miliar e meníngea) (bacilo de Calmette-Guérin). Deverá ser aplicada o mais precocemente possível, de preferência ainda na maternidade, em recém-nascidos com peso maior ou igual a 2.000 g."
+                            description:    "Previne contra as formas graves da tuberculose (miliar e meníngea) (bacilo de Calmette-Guérin). Deverá ser aplicada o mais precocemente possível, de preferência ainda na maternidade, em recém-nascidos com peso maior ou igual a 2.000 g.",
+                            applicationDate:    new Date(2020, 06, 24)
                         },
                         {
                             dueMonth:       0,
                             name:           "Hepatite B (dose ao nascer)",
-                            description:    "Previne contra hepatite B (recombinante). Aplicar a primeira dose nas primeiras 12 horas de vida"
+                            description:    "Previne contra hepatite B (recombinante). Aplicar a primeira dose nas primeiras 12 horas de vida",
+                            applicationDate:    new Date(2020, 06, 07)
                         },
                         {
                             dueMonth:       2,
                             name:           "Pentavalente (1ª dose)",
-                            description:    "Previne contra difteria, tétano, coqueluche pertussis, hepatite B (recombinante) e Haemophilus influenzae b (conjugada)."
+                            description:    "Previne contra difteria, tétano, coqueluche pertussis, hepatite B (recombinante) e Haemophilus influenzae b (conjugada).",
+                            applicationDate:    new Date(2020, 08, 11)
                         },
                         {
                             dueMonth:       2,
                             name:           "VIP (1ª dose)",
-                            description:    "Vacina Inativada Poliomielite 1, 2 e 3"
+                            description:    "Vacina Inativada Poliomielite 1, 2 e 3",
+                            applicationDate:    new Date(2020, 08, 11)
                         },
                         {
                             dueMonth:       2,
                             name:           "Pneumocócica 10V (conjugada) (1ª dose)",
-                            description:    "Previne contra meningite, pneumonia e otite média aguda."
+                            description:    "Previne contra meningite, pneumonia e otite média aguda.",
+                            applicationDate:    new Date(2020, 08, 11)
                         },
                         {
                             dueMonth:       2,
                             name:           "Rotavírus Humano (atenuada) (1ª dose)",
-                            description:    "Previne contra rotavírus humano G1P1"
+                            description:    "Previne contra rotavírus humano G1P1",
+                            applicationDate:    new Date(2020, 08, 11)
                         },
                         {
                             dueMonth:       3,
                             name:           "Meningocócica C (conjugada) (1ª dose)",
-                            description:    ""
+                            description:    "",
+                            applicationDate:    new Date(2020, 09, 14)
                         },
                         {
                             dueMonth:       4,
                             name:           "Pentavalente (2ª dose)",
-                            description:    "Previne contra difteria, tétano, coqueluche pertussis, hepatite B (recombinante) e Haemophilus influenzae b (conjugada)."
+                            description:    "Previne contra difteria, tétano, coqueluche pertussis, hepatite B (recombinante) e Haemophilus influenzae b (conjugada).",
+                            applicationDate:    new Date(2020, 10, 11)
                         },
                         {
                             dueMonth:       4,
                             name:           "VIP (2ª dose)",
-                            description:    "Vacina Inativada Poliomielite 1, 2 e 3"
+                            description:    "Vacina Inativada Poliomielite 1, 2 e 3",
+                            applicationDate:    new Date(2020, 10, 11)
                         },
                         {
                             dueMonth:       4,
                             name:           "Pneumocócica 10V (conjugada) (2ª dose)",
-                            description:    "Previne contra meningite, pneumonia e otite média aguda."
+                            description:    "Previne contra meningite, pneumonia e otite média aguda.",
+                            applicationDate:    new Date(2020, 10, 11)
                         },
                         {
                             dueMonth:       4,
                             name:           "Rotavírus Humano (atenuada) (2ª dose)",
-                            description:    "Previne contra rotavírus humano G1P1"
+                            description:    "Previne contra rotavírus humano G1P1",
+                            applicationDate:    new Date(2020, 10, 11)
                         },
                         {
                             dueMonth:       5,
                             name:           "Meningocócica C (conjugada) (2ª dose)",
-                            description:    ""
+                            description:    "",
+                            applicationDate:    new Date(2020, 11, 14)
                         },
                         {
                             dueMonth:       6,
                             name:           "Pentavalente (3ª dose)",
-                            description:    "Previne contra difteria, tétano, coqueluche pertussis, hepatite B (recombinante) e Haemophilus influenzae b (conjugada)."
+                            description:    "Previne contra difteria, tétano, coqueluche pertussis, hepatite B (recombinante) e Haemophilus influenzae b (conjugada).",
+                            applicationDate:    new Date(2021, 00, 11)
                         },
                         {
                             dueMonth:       6,
                             name:           "VIP (3ª dose)",
-                            description:    "Vacina Inativada Poliomielite 1, 2 e 3"
+                            description:    "Vacina Inativada Poliomielite 1, 2 e 3",
+                            applicationDate:    new Date(2021, 00, 11)
                         },
                         {
                             dueMonth:       9,
                             name:           "Febre Amarela (dose única)",
-                            description:    ""
+                            description:    "",
+                            applicationDate:    new Date(2021, 03, 09)
                         },
                         {
                             dueMonth:       12,
                             name:           "Meningocócica C (conjugada) (reforço)",
-                            description:    ""
+                            description:    "",
                         },
                         {
                             dueMonth:       12,
                             name:           "Pneumocócica 10V (conjugada) (reforço)",
-                            description:    "Previne contra meningite, pneumonia e otite média aguda."
+                            description:    "Previne contra meningite, pneumonia e otite média aguda.",
                         },
                         {
                             dueMonth:       12,
                             name:           "Tríplice Viral (dose única)",
-                            description:    "Previne contra sarampo, caxumba e rubéola."
+                            description:    "Previne contra sarampo, caxumba e rubéola.",
                         },
                         {
                             dueMonth:       15,
                             name:           "DTP (1º reforço)",
-                            description:    "Previne contra Difteria (crupe), Tétano, Pertussis (tríplice bacteriana), coqueluche, poliomelite e infecções causadas por Haemophilus influenza tipo B."
+                            description:    "Previne contra Difteria (crupe), Tétano, Pertussis (tríplice bacteriana), coqueluche, poliomelite e infecções causadas por Haemophilus influenza tipo B.",
                         },
                         {
                             dueMonth:       15,
                             name:           "VOP (atenuada) (1º reforço)",
-                            description:    "Vacina Oral Poliomielite, previne contra poliomelite 1 e 3."
+                            description:    "Vacina Oral Poliomielite, previne contra poliomelite 1 e 3.",
                         },
                         {
                             dueMonth:       15,
                             name:           "Hepatite A (inativada) (dose única)",
-                            description:    ""
+                            description:    "",
                         },
                         {
                             dueMonth:       15,
                             name:           "Tetra Viral (atenuada) (dose única)",
-                            description:    "Previne contra sarampo, caxumba, rubéola e varicela."
+                            description:    "Previne contra sarampo, caxumba, rubéola e varicela.",
                         },
                         {
                             dueMonth:       24,
                             name:           "Pneumocócica 23V (conjugada)",
-                            description:    "Disponível no SUS somente para POVOS INDÍGENAS. Previne contra protege contra doenças graves causadas pela bactéria pneumococo, como pneumonias, meningites e outras."
+                            description:    "Disponível no SUS somente para POVOS INDÍGENAS. Previne contra protege contra doenças graves causadas pela bactéria pneumococo, como pneumonias, meningites e outras.",
                         },
                         {
                             dueMonth:       48,
                             name:           "DTP (2º reforço)",
-                            description:    "Previne contra Difteria (crupe), Tétano, Pertussis (tríplice bacteriana), coqueluche, poliomelite e infecções causadas por Haemophilus influenza tipo B."
+                            description:    "Previne contra Difteria (crupe), Tétano, Pertussis (tríplice bacteriana), coqueluche, poliomelite e infecções causadas por Haemophilus influenza tipo B.",
                         },
                         {
                             dueMonth:       48,
                             name:           "VOP (atenuada) (2º reforço)",
-                            description:    "Vacina Oral Poliomielite, previne contra poliomelite 1 e 3."
+                            description:    "Vacina Oral Poliomielite, previne contra poliomelite 1 e 3.",
                         },
                         {
                             dueMonth:       48,
                             name:           "Varicela (atenuada) (dose única)",
-                            description:    ""
+                            description:    "",
                         },
                     ]

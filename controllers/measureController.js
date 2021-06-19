@@ -3,8 +3,7 @@ const Measure   = require('../models/Measure');
 
 exports.loadAllMeasures = async (req) => {
     let response = {
-        measures :  null,
-        err:        null
+        measures :  null
     }
     try {
         response.measures = await Measure.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
@@ -16,18 +15,18 @@ exports.loadAllMeasures = async (req) => {
         response.message    = "Sucesso"
         return response
     } catch (err){
+        console.log("loadAllMeasures > err >>>")
+        console.log(err)
         response.status     = 400
         response.message    = "Erro"
         response.error      = err
-        response.err        = err
         return response;
     }
 }
 
 exports.loadMeasure = async (idMeasure) => {
     let response = {
-        measure:    null,
-        err:        null
+        measure:    null
     }
     try {
         response.measure    = await Measure.findOne({_id: idMeasure}).exec();
@@ -35,10 +34,11 @@ exports.loadMeasure = async (idMeasure) => {
         response.message    = "Sucesso"
         return response
     } catch (err){
+        console.log("loadMeasure > err >>>")
+        console.log(err)
         response.status     = 400
         response.message    = "Erro"
         response.error      = err
-        response.err        = err
         return response;
     }
 }
@@ -46,38 +46,39 @@ exports.loadMeasure = async (idMeasure) => {
 exports.createBlankMeasures = async (req) => { return blankMeasures(req) }
 
 const blankMeasures = async (req) => {
-    const {_id, birth}  = req;
+    const {_id, name, birth}  = req;
     const birthDay      = new Date(birth).getDate()
 
     try {
         let sDate       = birth
-        let blankItem
+        let newMeasure
         let response = {}
 
         for (let index = 0; index <= 24; index++) {
             index > 0 ? sDate = addOneMonth(sDate) : false
-            blankItem = new Measure({
+            newMeasure = new Measure({
                 dueMonth:       index,
                 scheduleDate:   sDate,
-                weight:         0 ,
-                isSetW:         false,
-                length:         0,
-                isSetL:         false,
-                head:           0,
-                isSetH:         false,
+                weight:         (name === "AYLA" && index < 11 ) ? Ayla[index][0] : 0,
+                isSetW:         (name === "AYLA" && index < 11 ) ? true : false,
+                length:         (name === "AYLA" && index < 11 ) ? Ayla[index][1] : 0,
+                isSetL:         (name === "AYLA" && index < 11 ) ? true : false,
+                head:           (name === "AYLA" && index < 11 ) ? Ayla[index][2] : 0,
+                isSetH:         (name === "AYLA" && index < 11 ) ? true : false,
                 kid:            _id
             });
-            await blankItem.save();
+            await newMeasure.save();
         }
 
         response.status     = 200
         response.message    = "Sucesso"
         return response
      } catch (err){
+        console.log("blankMeasures > err >>>")
+        console.log(err)
         response.status     = 400
         response.message    = "Erro"
         response.error      = err
-        response.err        = err
         return response;
     }
 
@@ -153,6 +154,22 @@ exports.updateMeasure = async (req, res) => {
         await Measure.findOneAndUpdate(filter, body).exec();
         res.status(200).json({ status: 200, message: "Medidas atualizadas com sucesso" });
     } catch (err){
+        console.log("updateMeasure > err >>>")
+        console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao atualizar medidas", error: err });
     }
 }
+
+const Ayla = [
+    [ 3470, 49, 31,5 ],
+    [ 3845, 53.5, 35 ],
+    [ 4495, 55.5, 37 ],
+    [ 4978, 58.5, 38 ],
+    [ 5460, 61.5, 39 ],
+    [ 5960, 63, 40 ],
+    [ 6335, 64.5, 41 ],
+    [ 6665, 67, 41,5 ],
+    [ 6860, 69.5, 42 ],
+    [ 7520, 70, 42,5 ],
+    [ 8250, 71, 43 ],
+]

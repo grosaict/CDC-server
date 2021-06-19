@@ -28,6 +28,7 @@ const VaccineSchema = new Schema({
     },
     isSUS: {
         type: Boolean,
+        default: false,
         required: true
     },
     isSet: {
