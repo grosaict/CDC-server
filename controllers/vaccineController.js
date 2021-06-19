@@ -6,10 +6,10 @@ exports.loadAllVaccines = async (req) => {
         vaccines :  null
     }
     try {
-        response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
+        response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc', name: 'asc'}).exec();
         if (Object.keys(response.vaccines).length === 0){
             await SusVaccines(req)
-            response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc'}).exec();
+            response.vaccines = await Vaccine.find({kid: req._id}).sort({dueMonth: 'asc', name: 'asc'}).exec();
         }
         response.status     = 200
         response.message    = "Sucesso"
@@ -134,7 +134,7 @@ exports.newVaccine = async (req, res) => {
         const newVac = new Vaccine({
             dueMonth:           dueMonth,
             scheduleDate:       addMonths(kid.birth, dueMonth),
-            name:               name,
+            name:               name[0].toUpperCase()+name.substr(1),
             nameLower:          name.toLowerCase(),
             description:        description,
             applicationDate:    isSet ? applicationDate : null,
@@ -157,7 +157,6 @@ exports.updateVaccine= async (req, res) => {
     const { dueMonth, name, description , isSet } = req.body;
     const applicationDate   = new Date(req.body.applicationDate)
 
-
     const isDataOk = (k, v) => {
         const kidBirth  = k.birth
         const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate())
@@ -174,7 +173,7 @@ exports.updateVaccine= async (req, res) => {
             }
         }
 
-        if (isSet !== true     && isSet !== false) {
+        if (isSet !== true && isSet !== false) {
             return false
         }
 
@@ -229,6 +228,32 @@ exports.updateVaccine= async (req, res) => {
         console.log("updateVaccine > err >>>")
         console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao atualizar vacina", error: err });
+    }
+}
+
+exports.deleteVaccine= async (req, res) => {
+    const userId    = req.user._id
+    const vaccineId = req.params.id;
+    const filter    = { _id: vaccineId };
+   
+    try {
+        const v = await Vaccine.findById(vaccineId).exec();
+        if (!v) {
+            return res.status(400).send({ status: 400, message: "Erro a localizar vacina"});
+        }
+        const k = await Kid.findOne({_id: v.kid}).exec();
+        if (!k) {
+            return res.status(400).send({ status: 400, message: "Erro a localizar criança"});
+        }
+        if(userId != k.user._id){
+            return res.status(403).send({ status: 403, message: 'Acesso negado', });
+        }
+        await Vaccine.findOneAndDelete(filter);
+        res.status(200).json({ status: 200, message: "Vacina excluída com sucesso"});
+    } catch (err){
+        console.log("deleteVaccine > err >>>")
+        console.log(err)
+        res.status(400).send({ status: 400, message: "Erro ao excluir vacina"});
     }
 }
 

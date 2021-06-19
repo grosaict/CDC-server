@@ -94,19 +94,25 @@ exports.createKid = async (req, res) => {
     const birthYear     = new Date(birth).getFullYear()
     const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
 
-    const newKid = new Kid({
-        name:       nameUpper,
-        birth:      birthGMT3,
-        gender:     genderUpper,
-        measures:   new Array(),
-        user:       req.user._id
-    });
-
     try {
+        const userExist = await User.findOne({_id: req.user._id});
+        if(!userExist) {
+            return res.status(401).send({ status: 401, message: "Usuário não encontrado"});
+        }
+
         const kidExist = await Kid.findOne({name: nameUpper, user: req.user._id});
         if(kidExist) {
-            return res.status(201).send({ status: 201, message: "Criança já registrada"});
+            return res.status(406).send({ status: 406, message: "Criança já registrada"});
         }
+
+        const newKid = new Kid({
+            name:       nameUpper,
+            birth:      birthGMT3,
+            gender:     genderUpper,
+            measures:   new Array(),
+            user:       req.user._id
+        });
+
         const savedKid  = await newKid.save();
 
         const errorM    = await MeasureController.createBlankMeasures(savedKid)

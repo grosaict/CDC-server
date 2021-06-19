@@ -1,10 +1,8 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const morgan = require('morgan');
-const cors = require('cors');
-const mongoose = require('mongoose');
-
-/* const path = require("path"); */
+const express   = require('express');
+const dotenv    = require('dotenv');
+const morgan    = require('morgan');
+const cors      = require('cors');
+const mongoose  = require('mongoose');
 
 dotenv.config();
 
@@ -21,11 +19,6 @@ const measureRoute  = require('./routes/measure');
 const vaccineRoute  = require('./routes/vaccine');
 const loginRoute    = require('./routes/login');
 const userRoute     = require('./routes/user');
-
-/* app.use(
-  "/files",
-  express.static(path.resolve(__dirname, "uploads"))
-); */
 
 mongoose.connect(
   process.env.DB_CONNECT, 
