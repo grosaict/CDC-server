@@ -38,7 +38,13 @@ app.use('/api/login',   loginRoute);
 app.use('/api/user',    userRoute);
 
 const port = process.env.PORT;
+const host = process.env.HOST;
 
-app.listen(port, function () {
-  console.log(`http://localhost:${port}`);
+app.listen(port, function (err) {
+  console.log("server.js >>>")
+  console.log(host+":"+port);
+  if (err) {
+    console.log("err >>>")
+    console.log(err)
+  }
 });

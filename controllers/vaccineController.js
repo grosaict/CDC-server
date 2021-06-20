@@ -215,7 +215,7 @@ exports.updateVaccine= async (req, res) => {
         if (!v.isSUS) {
             body.dueMonth       = dueMonth
             body.scheduleDate   = addMonths(k.birth, dueMonth)
-            body.name           = name
+            body.name           = name[0].toUpperCase()+name.substr(1)
             body.nameLower      = name.toLowerCase()
             body.description    = description
         }
