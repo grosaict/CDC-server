@@ -10,6 +10,8 @@ exports.loadAllKids = async (req, res) => {
         let kids = await Kid.find({isActive: true, user: req.user._id}).sort({name: 'asc'}).exec();
         res.status(200).json({ status: 200, data: kids});
     } catch (err){
+        console.log("loadAllKids > err >>>")
+        console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao buscar as crianças"});
     }
 }
@@ -37,6 +39,8 @@ exports.loadKid = async (req, res) => {
             res.status(403).send({ status: 403, message: 'Acesso negado', });
         }
     } catch (err){
+        console.log("loadKid > err >>>")
+        console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao buscar criança" });
     }
 }
@@ -59,6 +63,8 @@ exports.loadKidByMeasure = async (req, res) => {
         }
 
     } catch (err){
+        console.log("loadKidByMeasure > err >>>")
+        console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao buscar criança"});
     }
 }
@@ -80,6 +86,8 @@ exports.loadKidByVaccine = async (req, res) => {
             res.status(403).send({ status: 403, message: 'Acesso negado', });
         }
     } catch (err){
+        console.log("loadKidByVaccine > err >>>")
+        console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao buscar criança"});
     }
 }
@@ -129,6 +137,8 @@ exports.createKid = async (req, res) => {
         res.status(200).json({ status: 200, message: "Criança cadastrada com sucesso"});
     } catch (err){
         await deleteKid(newKid)
+        console.log("createKid > err >>>")
+        console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao registrar criança", error: err });
     }
 }
@@ -146,6 +156,8 @@ const deleteKid = async (kidToDelete) => {
         response.status     = 400
         response.message    = "Erro"
         response.error      = err
-        return response;
+        console.log("deleteKid > err >>>")
+        console.log(err)
+          return response;
     }
 }

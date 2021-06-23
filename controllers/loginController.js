@@ -10,7 +10,7 @@ exports.login = async (req, res) => {
 
     const isComplete = loginValidation(data);
     if(isComplete.error){
-        return res.status(400).send(error.details[0].message);
+        return res.status(400).send({ status: 400, message: error.details[0].message });
     }
 
     let user;
@@ -19,7 +19,7 @@ exports.login = async (req, res) => {
     }
 
     if(!user) {
-        return res.status(403).json({ status: 403, message: "Este usuário não existe"});
+        return res.status(401).json({ status: 401, message: "Este usuário não existe"});
     }
 
     const validPassword = await bcrypt.compare(data.password, user.password);
@@ -28,5 +28,5 @@ exports.login = async (req, res) => {
     }
 
     const token = tokenController.generateToken(user);
-    res.status(200).json({ "token": token });
+    res.status(200).json({ status: 200, message: "Login efetuado com sucesso" , token: token });
 };

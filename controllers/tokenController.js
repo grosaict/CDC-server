@@ -9,7 +9,7 @@ module.exports.validation = function(req, res, next){
     const token = req.header('token');
 
     if(!token){
-        return res.status(401).send('Acess Denied');
+        return res.status(401).send({ status: 401, message: 'Acesso negado!' });
     }
 
     try{
@@ -17,6 +17,8 @@ module.exports.validation = function(req, res, next){
         req.user = verified;
         next();
     }catch(err){
-        res.status(400).send("Invalid Token");
+        console.log("tokenValidation > err >>>")
+        console.log(err)
+        res.status(401).send({  status: 401, message: "Token inválido! Acesso negado! " });
     }
 }
