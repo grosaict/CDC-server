@@ -103,7 +103,7 @@ exports.createKid = async (req, res) => {
     const birthMonth    = new Date(birth).getMonth()
     const birthYear     = new Date(birth).getFullYear()
     const birthGMT3     = new Date(birthYear, birthMonth, birthDay, 0, 0, 0,)
-    const newBirth     = new Date(birth)
+    const newBirth      = new Date(birth)
  
 
     console.log("createKid > birth >>>")
@@ -121,6 +121,19 @@ exports.createKid = async (req, res) => {
     console.log("createKid > newBirth.toGMTString() >>>")
     console.log(newBirth.toGMTString())
 
+    const nDate1 = new Date(birth).toLocaleString('en-US', {
+        timeZone: 'Asia/Calcutta'
+      });
+    console.log("createKid > nDate1 > timeZone: 'Asia/Calcutta'");
+    console.log(nDate1);
+
+    const nDate2 = new Date(birth).toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo'
+      });
+    console.log("createKid > nDate2 > timeZone: 'America/Sao_Paulo'");
+    console.log(nDate2);
+
+
     try {
         const userExist = await User.findOne({_id: req.user._id});
         if(!userExist) {
@@ -134,7 +147,7 @@ exports.createKid = async (req, res) => {
 
         const newKid = new Kid({
             name:       nameUpper,
-            birth:      birth,
+            birth:      birthGMT3, //birth,
             gender:     genderUpper,
             measures:   new Array(),
             user:       req.user._id
@@ -155,7 +168,7 @@ exports.createKid = async (req, res) => {
         }
         res.status(200).json({ status: 200, message: "Criança cadastrada com sucesso"});
     } catch (err){
-        await deleteKid(newKid)
+        //await deleteKid(newKid)
         console.log("createKid > err >>>")
         console.log(err)
         res.status(400).send({ status: 400, message: "Erro ao registrar criança", error: err });

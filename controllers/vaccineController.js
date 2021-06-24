@@ -137,7 +137,9 @@ exports.newVaccine = async (req, res) => {
             name:               name[0].toUpperCase()+name.substr(1),
             nameLower:          name.toLowerCase(),
             description:        description,
-            applicationDate:    isSet ? applicationDate : null,
+            applicationDate:    isSet ?
+                                    new Date(new Date(applicationDate).getFullYear(), new Date(applicationDate).getMonth() ,new Date(applicationDate).getDate())
+                                    : null,
             isSet:              isSet,
             kid:                kid._id,
         });
@@ -155,7 +157,7 @@ exports.updateVaccine= async (req, res) => {
     const filter            = { _id: req.params.id } // vaccineId
     const userId            = req.user._id
     const { dueMonth, name, description , isSet } = req.body;
-    const applicationDate   = new Date(req.body.applicationDate)
+    const applicationDate   = new Date(new Date(req.body.applicationDate).getFullYear(), new Date(req.body.applicationDate).getMonth() ,new Date(req.body.applicationDate).getDate())
 
     const isDataOk = (k, v) => {
         const kidBirth  = k.birth
@@ -204,7 +206,7 @@ exports.updateVaccine= async (req, res) => {
         }
 
         if (!isDataOk(k, v)) {
-            return res.status(400).send({ status: 400, message: "Alguma medida informada está acima ou abaixo do aceitável"});
+            return res.status(400).send({ status: 400, message: "Alguma informação digitada não atende os requisitos aceitáveis"});
         }
 
         const body      = {
