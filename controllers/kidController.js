@@ -1,3 +1,5 @@
+
+
 const User              = require('../models/User');
 const Kid               = require('../models/Kid');
 const Measure           = require('../models/Measure');
@@ -100,7 +102,24 @@ exports.createKid = async (req, res) => {
     const birthDay      = new Date(birth).getDate()
     const birthMonth    = new Date(birth).getMonth()
     const birthYear     = new Date(birth).getFullYear()
-    const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
+    const birthGMT3     = new Date(birthYear, birthMonth, birthDay, 0, 0, 0,)
+    const newBirth     = new Date(birth)
+ 
+
+    console.log("createKid > birth >>>")
+    console.log(birth)
+    console.log("createKid > birthDay >>>")
+    console.log(birthDay)
+    console.log("createKid > birthMonth >>>")
+    console.log(birthMonth)
+    console.log("createKid > birthYear >>>")
+    console.log(birthYear)
+    console.log("createKid > birthGMT3 >>>")
+    console.log(birthGMT3)
+    console.log("createKid > birthGMT3.toLocaleDateString() >>>")
+    console.log(birthGMT3.toLocaleDateString())
+    console.log("createKid > newBirth.toGMTString() >>>")
+    console.log(newBirth.toGMTString())
 
     try {
         const userExist = await User.findOne({_id: req.user._id});
@@ -115,7 +134,7 @@ exports.createKid = async (req, res) => {
 
         const newKid = new Kid({
             name:       nameUpper,
-            birth:      birthGMT3,
+            birth:      birth,
             gender:     genderUpper,
             measures:   new Array(),
             user:       req.user._id
