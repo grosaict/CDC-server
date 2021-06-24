@@ -49,31 +49,52 @@ const blankMeasures = async (req) => {
     const {_id, name, birth}  = req;
     const birthDay      = new Date(birth).getDate()
 
+    // ### TO DELETE AFTER TESTs
+    const isAyla =  (   name === "AYLA"
+                        && birth.getDate() === 7
+                        && birth.getMonth() === 6
+                        && birth.getFullYear() === 2020
+                    ) ? true : false
+
+    const Ayla  =   [
+                        [ 3470, 49, 31,5 ],
+                        [ 3845, 53.5, 35 ],
+                        [ 4495, 55.5, 37 ],
+                        [ 4978, 58.5, 38 ],
+                        [ 5460, 61.5, 39 ],
+                        [ 5960, 63, 40 ],
+                        [ 6335, 64.5, 41 ],
+                        [ 6665, 67, 41,5 ],
+                        [ 6860, 69.5, 42 ],
+                        [ 7520, 70, 42,5 ],
+                        [ 8250, 71, 43 ],
+                    ]
+    // ### TO DELETE AFTER TESTs
+
     try {
-        let sDate       = birth
+        let scdlDate    = birth
         let newMeasure
-        let response = {}
+        let response    = {}
 
         for (let index = 0; index <= 24; index++) {
-            index > 0 ? sDate = addOneMonth(sDate) : false
+            index > 0 ? scdlDate = addOneMonth(scdlDate) : false
             newMeasure = new Measure({
                 dueMonth:       index,
-                scheduleDate:   sDate,
-                weight:         (name === "AYLA" && index < 11 ) ? Ayla[index][0] : 0,
-                isSetW:         (name === "AYLA" && index < 11 ) ? true : false,
-                length:         (name === "AYLA" && index < 11 ) ? Ayla[index][1] : 0,
-                isSetL:         (name === "AYLA" && index < 11 ) ? true : false,
-                head:           (name === "AYLA" && index < 11 ) ? Ayla[index][2] : 0,
-                isSetH:         (name === "AYLA" && index < 11 ) ? true : false,
+                scheduleDate:   scdlDate,
+                weight:         (isAyla && index < 11 ) ? Ayla[index][0] : 0,   // ### TO REVIEW AFTER TESTs
+                isSetW:         (isAyla && index < 11 ) ? true : false,         // ### TO REVIEW AFTER TESTs
+                length:         (isAyla && index < 11 ) ? Ayla[index][1] : 0,   // ### TO REVIEW AFTER TESTs
+                isSetL:         (isAyla && index < 11 ) ? true : false,         // ### TO REVIEW AFTER TESTs
+                head:           (isAyla && index < 11 ) ? Ayla[index][2] : 0,   // ### TO REVIEW AFTER TESTs
+                isSetH:         (isAyla && index < 11 ) ? true : false,         // ### TO REVIEW AFTER TESTs
                 kid:            _id
             });
             await newMeasure.save();
         }
-
         response.status     = 200
         response.message    = "Sucesso"
         return response
-     } catch (err){
+    } catch (err) {
         console.log("blankMeasures > err >>>")
         console.log(err)
         response.status     = 400
@@ -123,7 +144,7 @@ exports.updateMeasure = async (req, res) => {
         lastUpdate: new Date(),
     }
 
-    const isDataOk = () => {  // ### TO SET LIMITS BASED ON WHO DATA TABLES
+    const isDataOk = () => {    // ### TO SET LIMITS BASED ON WHO DATA TABLES
 
         if (body.weight === ''   ||
             body.weight === undefined   || body.weight < 0      || body.weight > 25000) {
@@ -159,17 +180,3 @@ exports.updateMeasure = async (req, res) => {
         res.status(400).send({ status: 400, message: "Erro ao atualizar medidas", error: err });
     }
 }
-
-const Ayla = [
-    [ 3470, 49, 31,5 ],
-    [ 3845, 53.5, 35 ],
-    [ 4495, 55.5, 37 ],
-    [ 4978, 58.5, 38 ],
-    [ 5460, 61.5, 39 ],
-    [ 5960, 63, 40 ],
-    [ 6335, 64.5, 41 ],
-    [ 6665, 67, 41,5 ],
-    [ 6860, 69.5, 42 ],
-    [ 7520, 70, 42,5 ],
-    [ 8250, 71, 43 ],
-]

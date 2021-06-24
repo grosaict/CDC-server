@@ -85,10 +85,11 @@ const SusVaccines = async (req) => {
 
 exports.newVaccine = async (req, res) => {
     const userId            = req.user._id
-    const { dueMonth, name, description , applicationDate, isSet, kid } = req.body;
+    const { dueMonth, name, description , isSet, kid } = req.body;
+    const applicationDate   = new Date(new Date(req.body.applicationDate).getFullYear(), new Date(req.body.applicationDate).getMonth() ,new Date(req.body.applicationDate).getDate(), 3)
 
     const isDataOk = () => {
-        const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate())
+        const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate(), 3)
 
         if (dueMonth === ''    || dueMonth === undefined  ||
             dueMonth < 0 ) {
@@ -137,9 +138,7 @@ exports.newVaccine = async (req, res) => {
             name:               name[0].toUpperCase()+name.substr(1),
             nameLower:          name.toLowerCase(),
             description:        description,
-            applicationDate:    isSet ?
-                                    new Date(new Date(applicationDate).getFullYear(), new Date(applicationDate).getMonth() ,new Date(applicationDate).getDate())
-                                    : null,
+            applicationDate:    isSet ? applicationDate : null,
             isSet:              isSet,
             kid:                kid._id,
         });
@@ -157,11 +156,11 @@ exports.updateVaccine= async (req, res) => {
     const filter            = { _id: req.params.id } // vaccineId
     const userId            = req.user._id
     const { dueMonth, name, description , isSet } = req.body;
-    const applicationDate   = new Date(new Date(req.body.applicationDate).getFullYear(), new Date(req.body.applicationDate).getMonth() ,new Date(req.body.applicationDate).getDate())
+    const applicationDate   = new Date(new Date(req.body.applicationDate).getFullYear(), new Date(req.body.applicationDate).getMonth() ,new Date(req.body.applicationDate).getDate(), 3)
 
     const isDataOk = (k, v) => {
         const kidBirth  = k.birth
-        const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate())
+        const today     = new Date(new Date().getFullYear(), new Date().getMonth() ,new Date().getDate(), 3)
 
         if (!v.isSUS) {
             if (!name              || name === ''             ||
@@ -178,6 +177,19 @@ exports.updateVaccine= async (req, res) => {
         if (isSet !== true && isSet !== false) {
             return false
         }
+
+        console.log("today")
+        console.log(today)
+        console.log("today.getTime()")
+        console.log(today.getTime())
+        console.log("applicationDate")
+        console.log(applicationDate)
+        console.log("applicationDate.getTime()")
+        console.log(applicationDate.getTime())
+        console.log("kidBirth")
+        console.log(kidBirth)
+        console.log("kidBirth.getTime()")
+        console.log(kidBirth.getTime())
 
         if (isSet) {
             if(!applicationDate ||
@@ -293,7 +305,7 @@ function addMonths (dateToInc, inc) {
             }
         }
     }
-    return new Date(year, month, day);
+    return new Date(year, month, day, 3);
 }
 
 const susVaccines = [
