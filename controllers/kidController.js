@@ -102,8 +102,7 @@ exports.createKid = async (req, res) => {
     const birthDay      = new Date(birth).getDate()
     const birthMonth    = new Date(birth).getMonth()
     const birthYear     = new Date(birth).getFullYear()
-    const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
-    const newBirth      = new Date(birth)
+    const birthGMT3     = new Date(birthYear, birthMonth, birthDay, 3)
  
 
     console.log("createKid > birth >>>")
@@ -118,20 +117,6 @@ exports.createKid = async (req, res) => {
     console.log(birthGMT3)
     console.log("createKid > birthGMT3.toLocaleDateString() >>>")
     console.log(birthGMT3.toLocaleDateString())
-    console.log("createKid > newBirth.toGMTString() >>>")
-    console.log(newBirth.toGMTString())
-
-    const nDate1 = new Date(birth).toLocaleString('en-US', {
-        timeZone: 'Asia/Calcutta'
-      });
-    console.log("createKid > nDate1 > timeZone: 'Asia/Calcutta'");
-    console.log(nDate1);
-
-    const nDate2 = new Date(birth).toLocaleString('pt-BR', {
-        timeZone: 'America/Sao_Paulo'
-      });
-    console.log("createKid > nDate2 > timeZone: 'America/Sao_Paulo'");
-    console.log(nDate2);
 
 
     try {
