@@ -102,7 +102,7 @@ exports.createKid = async (req, res) => {
     const birthDay      = new Date(birth).getDate()
     const birthMonth    = new Date(birth).getMonth()
     const birthYear     = new Date(birth).getFullYear()
-    const birthGMT3     = new Date(birthYear, birthMonth, birthDay, 0, 0, 0,)
+    const birthGMT3     = new Date(birthYear, birthMonth, birthDay)
     const newBirth      = new Date(birth)
  
 
