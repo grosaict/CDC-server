@@ -178,19 +178,6 @@ exports.updateVaccine= async (req, res) => {
             return false
         }
 
-        console.log("today")
-        console.log(today)
-        console.log("today.getTime()")
-        console.log(today.getTime())
-        console.log("applicationDate")
-        console.log(applicationDate)
-        console.log("applicationDate.getTime()")
-        console.log(applicationDate.getTime())
-        console.log("kidBirth")
-        console.log(kidBirth)
-        console.log("kidBirth.getTime()")
-        console.log(kidBirth.getTime())
-
         if (isSet) {
             if(!applicationDate ||
                 applicationDate === '' ||
