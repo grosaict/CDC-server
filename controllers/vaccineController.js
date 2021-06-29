@@ -49,6 +49,14 @@ const SusVaccines = async (req) => {
     const {_id, name, birth}  = req;
     let newSUS
 
+    // REMOVE IT AFTER MVP DONE
+    const isAyla =  (   name === "AYLA"
+                        && birth.getDate() === 7
+                        && birth.getMonth() === 6
+                        && birth.getFullYear() === 2020
+                    ) ? true : false
+    // REMOVE IT AFTER MVP DONE
+
     let response = {
         vaccine:    null
     }
@@ -65,10 +73,14 @@ const SusVaccines = async (req) => {
                 isSet:          false,
                 kid:            _id
             })
-            if (name === 'AYLA' && newSUS.dueMonth <= 9 ){
+
+            // REMOVE IT AFTER MVP DONE
+            if (isAyla && newSUS.dueMonth <= 9 ){
                 newSUS.applicationDate  = susVaccines[index].applicationDate,
                 newSUS.isSet            = true
             }
+            // REMOVE IT AFTER MVP DONE
+
             await newSUS.save()
         }
         response.status     = 200

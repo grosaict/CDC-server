@@ -49,7 +49,7 @@ const blankMeasures = async (req) => {
     const {_id, name, birth}  = req;
     const birthDay      = new Date(birth).getDate()
 
-    // ### TO DELETE AFTER TESTs
+    // REMOVE IT AFTER MVP DONE
     const isAyla =  (   name === "AYLA"
                         && birth.getDate() === 7
                         && birth.getMonth() === 6
@@ -69,7 +69,7 @@ const blankMeasures = async (req) => {
                         [ 7520, 70, 42,5 ],
                         [ 8250, 71, 43 ],
                     ]
-    // ### TO DELETE AFTER TESTs
+    // REMOVE IT AFTER MVP DONE
 
     try {
         let scdlDate    = birth
